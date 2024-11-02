@@ -7,5 +7,3 @@ CustomerID=4 ArrivalTime=08:07 Order=Salad
 CustomerID=5 ArrivalTime=08:10 Order=Steak
 
 
-shahad was here
-shahad is leaving
