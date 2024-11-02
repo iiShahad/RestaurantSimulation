@@ -1,6 +1,6 @@
 import java.time.LocalTime;
 
-class Customer{
+class Customer implements Comparable<Customer> {
     private int id;
     private LocalTime arrivalTime;
     private String order;
@@ -25,5 +25,11 @@ class Customer{
 
     public String toString(){
         return "Customer ID: " + id + " Arrival Time: " + arrivalTime + " Order: " + order;
+    }
+
+    @Override
+    public int compareTo(Customer o) {
+        //return the earliest arrival time
+        return this.arrivalTime.compareTo(o.arrivalTime);
     }
 }

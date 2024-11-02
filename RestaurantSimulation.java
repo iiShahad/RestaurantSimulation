@@ -1,9 +1,8 @@
-//First: read from input files
-
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.time.LocalTime;
 import java.util.HashMap;
+import java.util.PriorityQueue;
 
 class RestaurantSimulation {
 
@@ -12,7 +11,8 @@ class RestaurantSimulation {
     static int numWaiters;
     static int numTables;
     static HashMap<String, Integer> meals = new HashMap<>();
-    static Customer[] customers = new Customer[20];
+    //PriorityQueue to store customers in arrival time order
+    static PriorityQueue<Customer> customerArrivalQueue = new PriorityQueue<>();
 
     public static void main(String[] args) {
         //input files
@@ -25,12 +25,7 @@ class RestaurantSimulation {
         System.out.println("Number of Chefs: " + numChefs);
         System.out.println("Number of Waiters: " + numWaiters);
         System.out.println("Number of Tables: " + numTables);
-        for (Object elem : customers) {
-            if (elem != null) {
-                System.out.println(elem.toString());
-            }
-
-        }
+        System.out.println("Customers in arrival time order: " + customerArrivalQueue);
 
     }
 
@@ -40,8 +35,6 @@ class RestaurantSimulation {
             try (BufferedReader br = new BufferedReader(fr)) {
                 String line;
                 int currentLine = 1;
-                //counter for the array insertion
-                int i = 0;
                 while ((line = br.readLine()) != null) {
                     //Reading the first line: NC NW NT
                     switch (currentLine) {
@@ -89,8 +82,7 @@ class RestaurantSimulation {
                                 throw new Exception("Invalid data");
                             }
                             Customer customer = new Customer(customerId, arrivalTime, order);
-                            customers[i] = customer;
-                            i++;
+                            customerArrivalQueue.add(customer);
                         }
                     }
                     currentLine++;
