@@ -3,14 +3,14 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-class Semaphore {
+class CustomSemaphore {
 
     //maxPermits is the total number of permits should be available
     private int maxPermits;
     //permits is the number of permits available
     private int permits;
 
-    public Semaphore(int maxPermits) {
+    public CustomSemaphore(int maxPermits) {
         this.maxPermits = maxPermits;
         this.permits = maxPermits;
     }
