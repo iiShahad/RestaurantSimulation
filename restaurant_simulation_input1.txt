@@ -1,0 +1,7 @@
+NC=2 NW=3 NT=4
+Burger=00:8 Pizza=00:10 Pasta=00:10 Salad=00:5 Steak=00:8 Sushi=00:5 Tacos=00:5 Soup=00:10
+CustomerID=1 ArrivalTime=08:00 Order=Burger
+CustomerID=2 ArrivalTime=08:02 Order=Pizza
+CustomerID=3 ArrivalTime=08:05 Order=Pasta
+CustomerID=4 ArrivalTime=08:07 Order=Salad
+CustomerID=5 ArrivalTime=08:10 Order=Steak
