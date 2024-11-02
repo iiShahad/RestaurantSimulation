@@ -1,9 +1,9 @@
 import java.time.LocalTime;
 
 class Customer implements Comparable<Customer> {
-    private int id;
-    private LocalTime arrivalTime;
-    private String order;
+    private final int id;
+    private final LocalTime arrivalTime;
+    private final String order;
 
     public Customer(int id, LocalTime arrivalTime, String order){
         this.id = id;
@@ -23,6 +23,7 @@ class Customer implements Comparable<Customer> {
         return order;
     }
 
+    @Override
     public String toString(){
         return "Customer ID: " + id + " Arrival Time: " + arrivalTime + " Order: " + order;
     }
