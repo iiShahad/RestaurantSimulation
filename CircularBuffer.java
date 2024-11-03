@@ -6,15 +6,15 @@ import java.util.concurrent.locks.ReentrantLock;
 class CircularBuffer<T> {
 
     private final int maxSize;
-    private final T[] buffer;
+    private final Object[] buffer;
     private final CustomSemaphore consumingSemaphore;
     private final CustomSemaphore producingSemaphore;
 
     public CircularBuffer(int maxSize) {
         this.maxSize = maxSize;
-        buffer = (T[]) new Object[maxSize];
-        consumingSemaphore = new CustomSemaphore(maxSize);
-        producingSemaphore = new CustomSemaphore(0);
+        buffer = new Object[maxSize];
+        producingSemaphore = new CustomSemaphore(maxSize);
+        consumingSemaphore = new CustomSemaphore(0);
     }
 
     private int head = 0;
@@ -41,9 +41,9 @@ class CircularBuffer<T> {
 
     }
 
-    public T remove() {
+    public Object remove() {
         lock.lock();
-        T item = null;
+        Object item = null;
         try {
             consumingSemaphore.acquire();
             item = buffer[tail];
@@ -58,4 +58,14 @@ class CircularBuffer<T> {
         return item;
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (Object item : buffer) {
+            if (item != null) {
+                sb.append(item).append(" ");
+            }
+        }
+        return sb.toString();
+    }
 }
