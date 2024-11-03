@@ -1,30 +1,52 @@
+
 import java.time.LocalTime;
 
-class Customer implements Comparable<Customer> {
+class Customer extends Thread implements Comparable<Customer> {
+
     private final int id;
     private final LocalTime arrivalTime;
     private final String order;
+    private final CircularBuffer<String> orderBuffer;
+    private int delay;
 
-    public Customer(int id, LocalTime arrivalTime, String order){
+    public Customer(int id, LocalTime arrivalTime, String order, CircularBuffer<String> orderBuffer) {
         this.id = id;
         this.arrivalTime = arrivalTime;
         this.order = order;
+        this.orderBuffer = orderBuffer;
     }
 
-    public int getId(){
+    @Override
+    public void run() {
+        try {
+            //FIXME: make this delay in minutes
+            Thread.sleep(100 * delay);
+            System.out.println("Customer ID: " + id + " Arrival Time: " + arrivalTime + " Order: " + order);
+            orderBuffer.add(order);
+            System.out.println("buffer: " + orderBuffer.toString());
+        } catch (Exception e) {
+            System.err.println("Exception in run method: " + e.getMessage());
+        }
+    }
+
+    public void setDelay(int delay) {
+        this.delay = delay;
+    }
+
+    public int getCustomerId() {
         return id;
     }
 
-    public LocalTime getArrivalTime(){
+    public LocalTime getArrivalTime() {
         return arrivalTime;
     }
 
-    public String getOrder(){
+    public String getOrder() {
         return order;
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return "Customer ID: " + id + " Arrival Time: " + arrivalTime + " Order: " + order;
     }
 
