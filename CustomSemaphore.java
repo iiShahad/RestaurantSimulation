@@ -6,7 +6,7 @@ import java.util.concurrent.locks.ReentrantLock;
 class CustomSemaphore {
 
     //maxPermits is the total number of permits should be available
-    private int maxPermits;
+    private final int maxPermits;
     //permits is the number of permits available
     private int permits;
 
