@@ -14,6 +14,8 @@ class RestaurantSimulation {
     //PriorityQueue to store customers in arrival time order
     static PriorityQueue<Customer> customerArrivalQueue = new PriorityQueue<>();
 
+    static CircularBuffer<String> orderBuffer = new CircularBuffer<>(5);
+
     public static void main(String[] args) {
         //input files
         String inputFile1 = "restaurant_simulation_input1.txt";
@@ -21,12 +23,23 @@ class RestaurantSimulation {
         String inputFile3 = "restaurant_simulation_input3.txt";
 
         readInputFile(inputFile1);
+        arrivalTimeToDelay();
 
-        System.out.println("Number of Chefs: " + numChefs);
-        System.out.println("Number of Waiters: " + numWaiters);
-        System.out.println("Number of Tables: " + numTables);
-        System.out.println("Customers in arrival time order: " + customerArrivalQueue);
+        for (Customer customer : customerArrivalQueue) {
+            new Thread(customer).start();
+        }
 
+
+    }
+
+    public static void arrivalTimeToDelay() {
+        //Calculate the delay time for each customer
+        LocalTime starTime = customerArrivalQueue.peek().getArrivalTime();
+        for (Customer customer : customerArrivalQueue) {
+            LocalTime arrivalTime = customer.getArrivalTime();
+            int delay = (int) (arrivalTime.toSecondOfDay() - starTime.toSecondOfDay());
+            customer.setDelay(delay);
+        }
     }
 
     public static void readInputFile(String inputFile) {
@@ -81,7 +94,7 @@ class RestaurantSimulation {
                             if (customerId == null || arrivalTime == null || order == null) {
                                 throw new Exception("Invalid data");
                             }
-                            Customer customer = new Customer(customerId, arrivalTime, order);
+                            Customer customer = new Customer(customerId, arrivalTime, order, orderBuffer);
                             customerArrivalQueue.add(customer);
                         }
                     }
