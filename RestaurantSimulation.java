@@ -82,7 +82,7 @@ class RestaurantSimulation {
         try {
             System.out.println("Total customer threads to wait for: " + customerThreads.size());
 
-            for (int i = 1; i <= customerThreads.size(); i++) {
+            for (int i = 0; i < customerThreads.size(); i++) {
                 Thread thread = customerThreads.get(i);
                 System.out.println("Waiting for customer thread " + i + " to finish...");
                 // Add timeout of 10 seconds for each thread
