@@ -126,7 +126,7 @@ class RestaurantSimulation {
     /*
     Based on the arrival time of the first customer, calculate the delay time for each customer,
     by subtracting the arrival time of the first customer from the arrival time of each customer.
-    This will be used to simulate the arrival time of each customer by setting a delay time for each customer.
+    This will be used to simulate the arrival time of each customer by setting a delay time at the beginning for each customer.
     */
     public static void arrivalTimeToDelay() {
         LocalTime starTime = customerArrivalQueue.peek().getArrivalTime();
