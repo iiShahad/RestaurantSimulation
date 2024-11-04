@@ -2,7 +2,6 @@
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-
 class CircularBuffer<T> {
 
     private final int maxSize;
@@ -26,34 +25,44 @@ class CircularBuffer<T> {
         return head == tail && buffer[head] != null;
     }
 
+    public boolean isEmpty() {
+        return head == tail && buffer[head] == null;
+    }
+
     public void add(T item) {
-        lock.lock();
         try {
             producingSemaphore.acquire();
-            buffer[head] = item;
-            head = (head + 1) % maxSize;
+            lock.lock();
+            try {
+                buffer[head] = item;
+                head = (head + 1) % maxSize;
+            } finally {
+                lock.unlock();
+            }
             consumingSemaphore.release();
         } catch (Exception e) {
             System.err.println("Exception in add method: " + e.getMessage());
-        } finally {
-            lock.unlock();
         }
 
     }
 
     public Object remove() {
-        lock.lock();
         Object item = null;
         try {
             consumingSemaphore.acquire();
-            item = buffer[tail];
-            buffer[tail] = null;
-            tail = (tail + 1) % maxSize;
+            lock.lock();
+            try {
+                item = buffer[tail];
+                buffer[tail] = null;
+                tail = (tail + 1) % maxSize;
+            } finally {
+                lock.unlock();
+            }
             producingSemaphore.release();
+
         } catch (Exception e) {
             System.err.println("Exception in remove method: " + e.getMessage());
-        } finally {
-            lock.unlock();
+
         }
         return item;
     }
