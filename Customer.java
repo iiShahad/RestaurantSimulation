@@ -1,21 +1,24 @@
 
 import java.time.LocalTime;
+import java.util.HashMap;
 
 class Customer extends Thread implements Comparable<Customer> {
     //Constructor --------------------------------------------------------------------
     private final int id;
     private final LocalTime arrivalTime;
     private final String order;
-    private final CircularBuffer<String> orderBuffer;
+    private final CircularBuffer<Order> orderBuffer;
     private final CircularBuffer<Customer> tableBuffer;
+    private final HashMap<String, Integer> meals;
     private int delay;
 
-    public Customer(int id, LocalTime arrivalTime, String order, CircularBuffer<String> orderBuffer, CircularBuffer<Customer> tableBuffer) {
+    public Customer(int id, LocalTime arrivalTime, String order, CircularBuffer<Order> orderBuffer, CircularBuffer<Customer> tableBuffer, HashMap<String, Integer> meals) {
         this.id = id;
         this.arrivalTime = arrivalTime;
         this.order = order;
         this.orderBuffer = orderBuffer;
         this.tableBuffer = tableBuffer;
+        this.meals = meals;
     }
 
     //Thread run method -------------------------------------------------------------
@@ -31,7 +34,9 @@ class Customer extends Thread implements Comparable<Customer> {
             //FIXME: make this delay in minutes
             Thread.sleep(1000 * delay);
             System.out.println("Customer ID: " + id + " Arrival Time: " + arrivalTime + " Order: " + order);
-            orderBuffer.add(order);
+            int preparingTime = meals.get(this.order);
+            Order newOrder = new Order(this.order, preparingTime, this.id);
+            orderBuffer.add(newOrder);
             tableBuffer.add(this);
             System.out.println("buffer: " + orderBuffer.toString());
         } catch (Exception e) {

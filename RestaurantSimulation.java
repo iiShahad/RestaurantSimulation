@@ -20,7 +20,7 @@ class RestaurantSimulation {
 
     static Chef[] chefs;
 
-    static CircularBuffer<String> orderBuffer; //CircularBuffer to store orders
+    static CircularBuffer<Order> orderBuffer; //CircularBuffer to store orders
     static CircularBuffer<Customer> tableBuffer; //CircularBuffer to store customers in tables
 
     static List<Thread> customerThreads = new ArrayList<>(); //List to store customer threads
@@ -74,7 +74,7 @@ class RestaurantSimulation {
             }
 
             for (int i = 0; i < numChefs; i++) {
-                chefs[i] = new Chef(i, orderBuffer, tableBuffer, meals);
+                chefs[i] = new Chef(i, orderBuffer, tableBuffer);
                 chefThreads.add(chefs[i]);
                 chefs[i].start();
             }
@@ -190,7 +190,7 @@ class RestaurantSimulation {
                 if (customerId == null || arrivalTime == null || order == null) {
                     throw new Exception("Invalid data");
                 }
-                Customer customer = new Customer(customerId, arrivalTime, order, orderBuffer, tableBuffer);
+                Customer customer = new Customer(customerId, arrivalTime, order, orderBuffer, tableBuffer, meals);
                 customerArrivalQueue.add(customer);
             }
         } catch (Exception e) {

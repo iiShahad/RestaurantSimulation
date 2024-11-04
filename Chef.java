@@ -1,17 +1,14 @@
 
-import java.util.HashMap;
 
 class Chef extends Thread {
     //Constructor --------------------------------------------------------------------
     private final int id;
-    private final CircularBuffer<String> orderBuffer;
+    private final CircularBuffer<Order> orderBuffer;
     private final CircularBuffer<Customer> tableBuffer;
-    private final HashMap<String, Integer> meals;
 
-    public Chef(int id, CircularBuffer<String> orderBuffer, CircularBuffer<Customer> tableBuffer,  HashMap<String, Integer> meals) {
+    public Chef(int id, CircularBuffer<Order> orderBuffer, CircularBuffer<Customer> tableBuffer) {
         this.id = id;
         this.orderBuffer = orderBuffer;
-        this.meals = meals;
         this.tableBuffer = tableBuffer;
     }
 
@@ -39,13 +36,13 @@ class Chef extends Thread {
                         mutex.release();
                         continue;
                     }
-                    String orderMeal = (String) orderBuffer.remove();
-                    int preparingTime = meals.get(orderMeal);
-                    System.out.println("Chef " + id + " is preparing " + orderMeal + " for " + preparingTime + " minutes");
+                    Order orderMeal = (Order) orderBuffer.remove();
+                    
+                    System.out.println("Chef " + id + " is preparing " + orderMeal + " for " + orderMeal.getMealTime() + " minutes");
                     mutex.release();
                     //FIXME: make this delay in minutes
                     // For real minutes, use: preparingTime * 60 * 1000
-                    Thread.sleep(1000 * preparingTime);
+                    Thread.sleep(1000 * orderMeal.getMealTime());
                     System.out.println("Chef " + id + " has prepared " + orderMeal);
                     //TODO: remove customer from tableBuffer
 
