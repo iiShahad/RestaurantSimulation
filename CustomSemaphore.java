@@ -23,7 +23,7 @@ class CustomSemaphore {
         lock.lock();
         try {
             //if permits are 0, thread will wait until it is notified if there are any permits available
-            if (permits == 0) {
+            while (permits == 0) {
                 condition.await();
             }
             //decrement the number of permits when there is a permit available
@@ -46,5 +46,9 @@ class CustomSemaphore {
         } finally {
             lock.unlock();
         }
+    }
+
+    public int getPermits() {
+        return permits;
     }
 }
