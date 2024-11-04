@@ -10,125 +10,125 @@ import java.util.PriorityQueue;
 
 class RestaurantSimulation {
 
-    //Global variables
+    //Global variables --------------------------------------------------------------
     static int numChefs;
     static int numWaiters;
     static int numTables;
     static HashMap<String, Integer> meals = new HashMap<>();
-    //PriorityQueue to store customers in arrival time order
-    static PriorityQueue<Customer> customerArrivalQueue = new PriorityQueue<>();
-    //chefs array
+
+    static PriorityQueue<Customer> customerArrivalQueue = new PriorityQueue<>(); //PriorityQueue to store customers in arrival time order
+
     static Chef[] chefs;
 
-    static CircularBuffer<String> orderBuffer;
-    static CircularBuffer<Customer> tableBuffer;
+    static CircularBuffer<String> orderBuffer; //CircularBuffer to store orders
+    static CircularBuffer<Customer> tableBuffer; //CircularBuffer to store customers in tables
 
-    static List<Thread> customerThreads = new ArrayList<>();
-    static List<Thread> chefThreads = new ArrayList<>();
+    static List<Thread> customerThreads = new ArrayList<>(); //List to store customer threads
+    static List<Thread> chefThreads = new ArrayList<>(); //List to store chef threads
 
     public static void main(String[] args) throws FileNotFoundException {
-        //input files
+        //input files --------------------------------------------------------------
         String inputFile1 = "restaurant_simulation_input1.txt";
         String inputFile2 = "restaurant_simulation_input2.txt";
         String inputFile3 = "restaurant_simulation_input3.txt";
 
+        //Read input files --------------------------------------------------------------
+        /*
+        What we need to do:
+        1. Read the configuration from the first line of the input file
+        2. Read the meals from the second line of the input file
+        3. Read the customers from the rest of the lines of the input file
+        4. Create and initialize the buffers and arrays
+        */
         try {
-        FileReader fr = new FileReader(inputFile1);
-        BufferedReader br = new BufferedReader(fr);
+            FileReader fr = new FileReader(inputFile1);
+            BufferedReader br = new BufferedReader(fr);
 
-        readConfig(br);
+            readConfig(br);
 
-        orderBuffer = new CircularBuffer<>(numTables);
-        tableBuffer = new CircularBuffer<>(numTables);
+            orderBuffer = new CircularBuffer<>(numTables);
+            tableBuffer = new CircularBuffer<>(numTables);
+            chefs = new Chef[numChefs];
 
-        readCustomers(br);
-            
+            readCustomers(br);
+
         } catch (Exception e) {
+            System.err.println("Exception in main method (Reading input files): " + e.getMessage());
         }
 
-        chefs = new Chef[numChefs];
-        arrivalTimeToDelay();
+        //Start simulation --------------------------------------------------------------
+        /*
+        What we need to do:
+        1. Calculate the delay time for each customer
+        2. Start the customer threads
+        3. Start the chef threads
+        */
+        try{
+            arrivalTimeToDelay();
 
-        for (Customer customer : customerArrivalQueue) {
-            Thread thread = new Thread(customer);
-            customerThreads.add(thread);
-            thread.start();
+            for (Customer customer : customerArrivalQueue) {
+                Thread thread = new Thread(customer);
+                customerThreads.add(thread);
+                thread.start();
 
+            }
+
+            for (int i = 0; i < numChefs; i++) {
+                chefs[i] = new Chef(i, orderBuffer, tableBuffer, meals);
+                chefThreads.add(chefs[i]);
+                chefs[i].start();
+            }
+        }catch (Exception e){
+            System.err.println("Exception in main method (Simulation): " + e.getMessage());
         }
 
-        for (int i = 0; i < numChefs; i++) {
-            chefs[i] = new Chef(i, orderBuffer, meals);
-            chefThreads.add(chefs[i]);
-            chefs[i].start();
-        }
-
-        // try {
-        //     for (Thread thread : customerThreads) {
-        //         System.out.println("join");
-        //         thread.join();
-        //     }
-        //     for (Chef chef : chefs) {
-        //         System.out.println("endShift");
-        //         chef.endShift();
-        //     }
-        //     for (Thread thread : chefThreads) {
-        //         thread.join();
-        //     }
-        // } catch (Exception e) {
-        //     System.err.println("Exception in main method: " + e.getMessage());
-        // }
-        System.out.println("Waiting for all threads to finish...");
-        // Wait for all threads to finish with timeout
+        //Wait for threads --------------------------------------------------------------
+        /*
+        What we need to do:
+        1. Wait for all customer threads to finish
+        2. End the shifts for all chefs
+        3. Wait for all chef threads to finish
+        */
         try {
-            System.out.println("Total customer threads to wait for: " + customerThreads.size());
-
             for (int i = 0; i < customerThreads.size(); i++) {
                 Thread thread = customerThreads.get(i);
-                System.out.println("Waiting for customer thread " + i + " to finish...");
-                // Add timeout of 10 seconds for each thread
-                thread.join(10000);
+                thread.join(10000); // Add timeout of 10 seconds for each thread
                 if (thread.isAlive()) {
-                    System.out.println("WARNING: Customer thread " + i + " did not finish within timeout!");
-                    // Optional: dump thread state for debugging
-                    System.out.println("Thread state: " + thread.getState());
-                } else {
-                    System.out.println("Customer thread " + i + " has finished.");
+                    System.out.println("WARNING: Customer thread " + (i + 1) + " did not finish within timeout, Thread state: " + thread.getState());
                 }
             }
 
-            System.out.println("Checking if chefs array is populated...");
             if (chefs == null) {
                 System.out.println("Error: Chefs array is null.");
             } else {
-                System.out.println("Chefs array length: " + chefs.length);
                 // End shifts for all chefs
-                for (int i = 0; i < chefs.length; i++) {
-                    System.out.println("Ending shift for chef " + i);
-                    chefs[i].endShift();
+                for (Chef chef : chefs) {
+                    chef.endShift();
                 }
-
                 // Wait for chef threads with timeout
                 for (int i = 0; i < chefThreads.size(); i++) {
                     Thread thread = chefThreads.get(i);
-                    System.out.println("Waiting for chef thread " + i + " to finish...");
-                    thread.join(10000);
+                    thread.join(10000); // Add timeout of 10 seconds for each thread
                     if (thread.isAlive()) {
-                        System.out.println("WARNING: Chef thread " + i + " did not finish within timeout!");
-                        System.out.println("Thread state: " + thread.getState());
-                    } else {
-                        System.out.println("Chef thread " + i + " has finished.");
-                    }
+                        System.out.println("WARNING: Chef thread " + (i + 1) + " did not finish within timeout, Thread state: " + thread.getState());
+                    } 
                 }
             }
         } catch (Exception e) {
-            System.err.println("Exception in main method (Wait for all threads to finish): " + e.getMessage());
-            e.printStackTrace();
+            System.err.println("Exception in main method (Waiting for threads): " + e.getMessage());
         }
 
     }
 
+    //Helper methods --------------------------------------------------------------
+
+    //Calculate the delay time for each customer
+    /*
+    Based on the arrival time of the first customer, calculate the delay time for each customer,
+    by subtracting the arrival time of the first customer from the arrival time of each customer.
+    This will be used to simulate the arrival time of each customer by setting a delay time for each customer.
+    */
     public static void arrivalTimeToDelay() {
-        //Calculate the delay time for each customer
         LocalTime starTime = customerArrivalQueue.peek().getArrivalTime();
         for (Customer customer : customerArrivalQueue) {
             LocalTime arrivalTime = customer.getArrivalTime();
@@ -137,7 +137,7 @@ class RestaurantSimulation {
         }
     }
 
-
+    //Read the configuration and meals from the input file
     public static void readConfig(BufferedReader br) throws Exception {
         try {
             String firstLine = br.readLine();
@@ -166,8 +166,8 @@ class RestaurantSimulation {
         }
     }
 
-
-     public static void readCustomers(BufferedReader br) throws Exception{
+    //Read the customers from the input file
+    public static void readCustomers(BufferedReader br) throws Exception {
         try {
             String line;
             while ((line = br.readLine()) != null) {
@@ -196,6 +196,6 @@ class RestaurantSimulation {
         } catch (Exception e) {
             throw e;
         }
-     }
+    }
 
 }

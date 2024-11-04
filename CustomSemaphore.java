@@ -4,20 +4,21 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 class CustomSemaphore {
-
-    //maxPermits is the total number of permits should be available
-    private final int maxPermits;
-    //permits is the number of permits available
-    private int permits;
+    //Constructor --------------------------------------------------------------------
+    private final int maxPermits; //maxPermits is the total number of permits should be available
+    private int permits; //permits is the number of permits available
 
     public CustomSemaphore(int maxPermits) {
         this.maxPermits = maxPermits;
         this.permits = maxPermits;
     }
 
+    //Global variables --------------------------------------------------------------
     private final Lock lock = new ReentrantLock();
     private final Condition condition = lock.newCondition();
 
+    //acquire method --------------------------------------------------------------
+    //This method is used to acquire a permit from the semaphore
     public void acquire() {
         //thread will lock the lock when it enters the method
         lock.lock();
@@ -35,6 +36,8 @@ class CustomSemaphore {
         }
     }
 
+    //release method --------------------------------------------------------------
+    //This method is used to release a permit to the semaphore
     public void release() {
         //thread will lock the lock when it enters the method
         lock.lock();
@@ -48,7 +51,8 @@ class CustomSemaphore {
         }
     }
 
-    public int getPermits() {
+    //getters --------------------------------------------------------------------
+    public int getCurrentPermits() {
         return permits;
     }
 }
