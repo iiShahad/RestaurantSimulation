@@ -7,20 +7,21 @@ class Customer extends Thread implements Comparable<Customer> {
     private final LocalTime arrivalTime;
     private final String order;
     private final CircularBuffer<String> orderBuffer;
+    private final CircularBuffer<Customer> tableBuffer;
     private int delay;
 
-    public Customer(int id, LocalTime arrivalTime, String order, CircularBuffer<String> orderBuffer) {
+    public Customer(int id, LocalTime arrivalTime, String order, CircularBuffer<String> orderBuffer, CircularBuffer<Customer> tableBuffer) {
         this.id = id;
         this.arrivalTime = arrivalTime;
         this.order = order;
         this.orderBuffer = orderBuffer;
+        this.tableBuffer = tableBuffer;
     }
 
     @Override
     public void run() {
         try {
             //FIXME: make this delay in minutes
-            System.err.println("Delay: " + delay);
             Thread.sleep(1000 * delay);
             System.out.println("Customer ID: " + id + " Arrival Time: " + arrivalTime + " Order: " + order);
             orderBuffer.add(order);
