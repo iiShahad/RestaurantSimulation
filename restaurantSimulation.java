@@ -1,7 +1,10 @@
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.PriorityQueue;
 
 class RestaurantSimulation {
@@ -13,8 +16,13 @@ class RestaurantSimulation {
     static HashMap<String, Integer> meals = new HashMap<>();
     //PriorityQueue to store customers in arrival time order
     static PriorityQueue<Customer> customerArrivalQueue = new PriorityQueue<>();
+    //chefs array
+    static Chef[] chefs;
 
     static CircularBuffer<String> orderBuffer = new CircularBuffer<>(5);
+
+    static List<Thread> customerThreads = new ArrayList<>();
+    static List<Thread> chefThreads = new ArrayList<>();
 
     public static void main(String[] args) {
         //input files
@@ -23,12 +31,44 @@ class RestaurantSimulation {
         String inputFile3 = "restaurant_simulation_input3.txt";
 
         readInputFile(inputFile1);
+        chefs = new Chef[numChefs];
         arrivalTimeToDelay();
 
         for (Customer customer : customerArrivalQueue) {
-            new Thread(customer).start();
+            Thread thread = new Thread(customer);
+            customerThreads.add(thread);
+            thread.start();
+
         }
 
+        for (int i = 0; i < numChefs; i++) {
+            chefs[i] = new Chef(i, orderBuffer, meals);
+            chefThreads.add(chefs[i]);
+            chefs[i].start();
+        }
+
+
+        try {
+
+            for (Thread thread : customerThreads) {
+                System.out.println("join");
+                thread.join();
+            }
+
+
+            for (Chef chef : chefs) {
+                System.out.println("endShift");
+                chef.endShift();
+            }
+
+            for (Thread thread : chefThreads) {
+                thread.join();
+
+            }
+
+        } catch (Exception e) {
+            System.err.println("Exception in main method: " + e.getMessage());
+        }
 
     }
 
