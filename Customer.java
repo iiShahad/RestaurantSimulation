@@ -20,7 +20,8 @@ class Customer extends Thread implements Comparable<Customer> {
     public void run() {
         try {
             //FIXME: make this delay in minutes
-            Thread.sleep(100 * delay);
+            System.err.println("Delay: " + delay);
+            Thread.sleep(1000 * delay);
             System.out.println("Customer ID: " + id + " Arrival Time: " + arrivalTime + " Order: " + order);
             orderBuffer.add(order);
             System.out.println("buffer: " + orderBuffer.toString());
