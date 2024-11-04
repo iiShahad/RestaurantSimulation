@@ -37,7 +37,7 @@ class RestaurantSimulation {
         LocalTime starTime = customerArrivalQueue.peek().getArrivalTime();
         for (Customer customer : customerArrivalQueue) {
             LocalTime arrivalTime = customer.getArrivalTime();
-            int delay = (int) (arrivalTime.getHour()- starTime.getMinute());
+            int delay = (int) (arrivalTime.getMinute()- starTime.getMinute());
             customer.setDelay(delay);
         }
     }
