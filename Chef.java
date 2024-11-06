@@ -44,6 +44,7 @@ class Chef extends Thread {
                     // For real minutes, use: preparingTime * 60 * 1000
                     Thread.sleep(1000 * orderMeal.getMealTime());
                     System.out.println("Chef " + id + " has prepared " + orderMeal);
+                    orderMeal.markOrderReady();
                     //TODO: remove customer from tableBuffer
 
                 } finally {
