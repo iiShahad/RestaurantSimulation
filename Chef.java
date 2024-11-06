@@ -4,9 +4,9 @@ class Chef extends Thread {
     //Constructor --------------------------------------------------------------------
     private final int id;
     private final CircularBuffer<Order> orderBuffer;
-    private final CircularBuffer<Customer> tableBuffer;
+    private final BoundedQueue<Customer> tableBuffer;
 
-    public Chef(int id, CircularBuffer<Order> orderBuffer, CircularBuffer<Customer> tableBuffer) {
+    public Chef(int id, CircularBuffer<Order> orderBuffer, BoundedQueue<Customer> tableBuffer) {
         this.id = id;
         this.orderBuffer = orderBuffer;
         this.tableBuffer = tableBuffer;
@@ -41,10 +41,8 @@ class Chef extends Thread {
                     mutex.release();
                     //FIXME: make this delay in minutes
                     // For real minutes, use: preparingTime * 60 * 1000
-                    Thread.sleep(1000 * orderMeal.getMealTime());
+                    Thread.sleep(1000 * orderMeal.getMealTime() * 60);
                     orderMeal.markOrderReady(this.id);
-                    //TODO: remove customer from tableBuffer
-
                 } finally {
                     if (mutex.getCurrentPermits() == 0) {
                         mutex.release();

@@ -18,10 +18,13 @@ class RestaurantSimulation {
 
     static PriorityQueue<Customer> customerArrivalQueue = new PriorityQueue<>(); //PriorityQueue to store customers in arrival time order
 
+
     static Chef[] chefs;
 
     static CircularBuffer<Order> orderBuffer; //CircularBuffer to store orders
-    static CircularBuffer<Customer> tableBuffer; //CircularBuffer to store customers in tables
+    // static CircularBuffer<Customer> tableBuffer; //CircularBuffer to store customers in tables
+    static BoundedQueue<Customer> tableQueue; //PriorityQueue to store customers in arrival time order
+
 
     static List<Thread> customerThreads = new ArrayList<>(); //List to store customer threads
     static List<Thread> chefThreads = new ArrayList<>(); //List to store chef threads
@@ -47,7 +50,7 @@ class RestaurantSimulation {
             readConfig(br);
 
             orderBuffer = new CircularBuffer<>(numTables);
-            tableBuffer = new CircularBuffer<>(numTables);
+            tableQueue = new BoundedQueue<Customer>(numTables);
             chefs = new Chef[numChefs];
 
             readCustomers(br);
@@ -74,7 +77,7 @@ class RestaurantSimulation {
             }
 
             for (int i = 0; i < numChefs; i++) {
-                chefs[i] = new Chef(i, orderBuffer, tableBuffer);
+                chefs[i] = new Chef(i, orderBuffer, tableQueue);
                 chefThreads.add(chefs[i]);
                 chefs[i].start();
             }
@@ -92,7 +95,7 @@ class RestaurantSimulation {
         try {
             for (int i = 0; i < customerThreads.size(); i++) {
                 Thread thread = customerThreads.get(i);
-                thread.join(10000); // Add timeout of 10 seconds for each thread
+                thread.join(100000); // Add timeout of 10 seconds for each thread
                 if (thread.isAlive()) {
                     System.out.println("WARNING: Customer thread " + (i + 1) + " did not finish within timeout, Thread state: " + thread.getState());
                 }
@@ -108,7 +111,7 @@ class RestaurantSimulation {
                 // Wait for chef threads with timeout
                 for (int i = 0; i < chefThreads.size(); i++) {
                     Thread thread = chefThreads.get(i);
-                    thread.join(10000); // Add timeout of 10 seconds for each thread
+                    thread.join(100000); // Add timeout of 10 seconds for each thread
                     if (thread.isAlive()) {
                         System.out.println("WARNING: Chef thread " + (i + 1) + " did not finish within timeout, Thread state: " + thread.getState());
                     }
@@ -191,7 +194,7 @@ class RestaurantSimulation {
                 }
                 int preparingTime = meals.get(order);
                 Order newOrder = new Order(order, preparingTime, customerId);
-                Customer customer = new Customer(customerId, arrivalTime, newOrder, orderBuffer, tableBuffer, meals);
+                Customer customer = new Customer(customerId, arrivalTime, newOrder, orderBuffer, tableQueue, meals);
                 customerArrivalQueue.add(customer);
             }
         } catch (Exception e) {
