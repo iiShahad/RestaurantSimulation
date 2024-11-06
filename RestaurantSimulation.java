@@ -39,7 +39,7 @@ class RestaurantSimulation {
         2. Read the meals from the second line of the input file
         3. Read the customers from the rest of the lines of the input file
         4. Create and initialize the buffers and arrays
-        */
+         */
         try {
             FileReader fr = new FileReader(inputFile1);
             BufferedReader br = new BufferedReader(fr);
@@ -62,8 +62,8 @@ class RestaurantSimulation {
         1. Calculate the delay time for each customer
         2. Start the customer threads
         3. Start the chef threads
-        */
-        try{
+         */
+        try {
             arrivalTimeToDelay();
 
             for (Customer customer : customerArrivalQueue) {
@@ -78,7 +78,7 @@ class RestaurantSimulation {
                 chefThreads.add(chefs[i]);
                 chefs[i].start();
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             System.err.println("Exception in main method (Simulation): " + e.getMessage());
         }
 
@@ -88,7 +88,7 @@ class RestaurantSimulation {
         1. Wait for all customer threads to finish
         2. End the shifts for all chefs
         3. Wait for all chef threads to finish
-        */
+         */
         try {
             for (int i = 0; i < customerThreads.size(); i++) {
                 Thread thread = customerThreads.get(i);
@@ -111,7 +111,7 @@ class RestaurantSimulation {
                     thread.join(10000); // Add timeout of 10 seconds for each thread
                     if (thread.isAlive()) {
                         System.out.println("WARNING: Chef thread " + (i + 1) + " did not finish within timeout, Thread state: " + thread.getState());
-                    } 
+                    }
                 }
             }
         } catch (Exception e) {
@@ -121,13 +121,12 @@ class RestaurantSimulation {
     }
 
     //Helper methods --------------------------------------------------------------
-
     //Calculate the delay time for each customer
     /*
     Based on the arrival time of the first customer, calculate the delay time for each customer,
     by subtracting the arrival time of the first customer from the arrival time of each customer.
     This will be used to simulate the arrival time of each customer by setting a delay time at the beginning for each customer.
-    */
+     */
     public static void arrivalTimeToDelay() {
         LocalTime starTime = customerArrivalQueue.peek().getArrivalTime();
         for (Customer customer : customerArrivalQueue) {
@@ -190,7 +189,9 @@ class RestaurantSimulation {
                 if (customerId == null || arrivalTime == null || order == null) {
                     throw new Exception("Invalid data");
                 }
-                Customer customer = new Customer(customerId, arrivalTime, order, orderBuffer, tableBuffer, meals);
+                int preparingTime = meals.get(order);
+                Order newOrder = new Order(order, preparingTime, customerId);
+                Customer customer = new Customer(customerId, arrivalTime, newOrder, orderBuffer, tableBuffer, meals);
                 customerArrivalQueue.add(customer);
             }
         } catch (Exception e) {

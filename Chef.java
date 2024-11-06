@@ -37,14 +37,12 @@ class Chef extends Thread {
                         continue;
                     }
                     Order orderMeal = (Order) orderBuffer.remove();
-                    
-                    System.out.println("Chef " + id + " is preparing " + orderMeal + " for " + orderMeal.getMealTime() + " minutes");
+
                     mutex.release();
                     //FIXME: make this delay in minutes
                     // For real minutes, use: preparingTime * 60 * 1000
                     Thread.sleep(1000 * orderMeal.getMealTime());
-                    System.out.println("Chef " + id + " has prepared " + orderMeal);
-                    orderMeal.markOrderReady();
+                    orderMeal.markOrderReady(this.id);
                     //TODO: remove customer from tableBuffer
 
                 } finally {

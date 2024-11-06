@@ -9,6 +9,7 @@ class Order {
     private String mealName;
     private int mealTime;
     private int customerId;
+    private int chefId;
 
     public Order(String mealName, int mealTime, int customerId) {
         this.mealName = mealName;
@@ -19,7 +20,7 @@ class Order {
     private final Condition orderReadyCondition = lock.newCondition();
     private boolean orderReady = false;
 
-    public void waitUntilOrderReady() {
+    public int waitUntilOrderReady() {
         lock.lock();
         try {
             while (!orderReady) {
@@ -30,12 +31,14 @@ class Order {
         } finally {
             lock.unlock();
         }
+        return chefId;
     }
 
-    public void markOrderReady() {
+    public void markOrderReady(int chefId) {
         lock.lock();
         try {
             orderReady = true;
+            this.chefId = chefId;
             orderReadyCondition.signal();
         } catch (Exception e) {
             System.err.println("Exception in markOrderReady: " + e.getMessage());
@@ -56,6 +59,7 @@ class Order {
     public int getCustomerId() {
         return customerId;
     }
+
 
     @Override
     public String toString() {
