@@ -6,12 +6,12 @@ import java.util.HashMap;
 //This class is a wrapper class, which stores the data of a customer, including the customer ID, chef ID, waiter ID, events, order, and table index.
 class CustomerData {
 
-    private int customerId;
-    private int chefId;
-    private int waiterId;
-    private HashMap<String, LocalTime> events;
-    private Order order;
-    private int tableIndex;
+    private final int customerId;
+    private final int chefId;
+    private final int waiterId;
+    private final HashMap<String, LocalTime> events;
+    private final Order order;
+    private final int tableIndex;
 
     public CustomerData(int customerId, int chefId, int waiterId, HashMap<String, LocalTime> events, Order order, int tableIndex) {
         this.customerId = customerId;

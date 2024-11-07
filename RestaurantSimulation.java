@@ -17,41 +17,51 @@ class RestaurantSimulation {
     static int numWaiters;
     static int numTables;
 
-    static Map<Integer, CustomerData> customerServingData = new HashMap<>();
-    static HashMap<String, Integer> meals = new HashMap<>();
-
     static PriorityQueue<Customer> customerArrivalQueue = new PriorityQueue<>(); //PriorityQueue to store customers in arrival time order
+    static Map<Integer, CustomerData> customerServingData = new HashMap<>();  //HashMap to store customer serving data
+    static HashMap<String, Integer> meals = new HashMap<>(); //HashMap to store meal names and preparation times
 
-    static Chef[] chefs;
+    static Chef[] chefs; //Array to store chef instances
 
     static CircularBuffer<Order> orderBuffer; //CircularBuffer to store orders
-    static BoundedQueue<Customer> tableQueue; //PriorityQueue to store customers in arrival time order
+    static BoundedQueue<Customer> tableQueue; //tableQueue to store customers in tables and sort them by serving time
 
     static List<Thread> customerThreads = new ArrayList<>(); //List to store customer threads
     static List<Thread> chefThreads = new ArrayList<>(); //List to store chef threads
 
     public static void main(String[] args) throws FileNotFoundException {
-        //input files --------------------------------------------------------------
+        //input files 
         String inputFile1 = "restaurant_simulation_input1.txt";
         String inputFile2 = "restaurant_simulation_input2.txt";
         String inputFile3 = "restaurant_simulation_input3.txt";
 
-        //Read input files --------------------------------------------------------------
-        /*
-        What we need to do:
-        1. Read the configuration from the first line of the input file
-        2. Read the meals from the second line of the input file
-        3. Read the customers from the rest of the lines of the input file
-        4. Create and initialize the buffers and arrays
-         */
+        //Read input files 
+        readAndInitializeData(inputFile1);
+
+        //Start simulation
+        startThreads();
+
+        //Wait for threads
+        waitForThreads();
+    }
+
+    //Read input files --------------------------------------------------------------
+    /*
+    What we need to do:
+    1. Read the configuration from the first line of the input file
+    2. Read the meals from the second line of the input file
+    3. Read the customers from the rest of the lines of the input file
+    4. Create and initialize the buffers and arrays 
+    */
+    public static void readAndInitializeData(String inputFile) {
         try {
-            FileReader fr = new FileReader(inputFile1);
+            FileReader fr = new FileReader(inputFile);
             BufferedReader br = new BufferedReader(fr);
 
             readConfig(br);
 
             orderBuffer = new CircularBuffer<>(numTables);
-            tableQueue = new BoundedQueue<Customer>(numTables);
+            tableQueue = new BoundedQueue<>(numTables);
             chefs = new Chef[numChefs];
 
             readCustomers(br);
@@ -59,14 +69,16 @@ class RestaurantSimulation {
         } catch (Exception e) {
             System.err.println("Exception in main method (Reading input files): " + e.getMessage());
         }
+    }
 
-        //Start simulation --------------------------------------------------------------
-        /*
-        What we need to do:
-        1. Calculate the delay time for each customer
-        2. Start the customer threads
-        3. Start the chef threads
-         */
+    //Start simulation --------------------------------------------------------------
+    /*
+    What we need to do:
+    1. Calculate the delay time for each customer
+    2. Start the customer threads
+    3. Start the chef threads
+     */
+    public static void startThreads() {
         try {
             arrivalTimeToDelay();
 
@@ -78,21 +90,23 @@ class RestaurantSimulation {
             }
 
             for (int i = 0; i < numChefs; i++) {
-                chefs[i] = new Chef(i + 1, orderBuffer);
+
                 chefThreads.add(chefs[i]);
                 chefs[i].start();
             }
         } catch (Exception e) {
             System.err.println("Exception in main method (Simulation): " + e.getMessage());
         }
+    }
 
-        //Wait for threads --------------------------------------------------------------
-        /*
-        What we need to do:
-        1. Wait for all customer threads to finish
-        2. End the shifts for all chefs
-        3. Wait for all chef threads to finish
-         */
+    //Wait for threads --------------------------------------------------------------
+    /*
+    What we need to do:
+    1. Wait for all customer threads to finish
+    2. End the shifts for all chefs
+    3. Wait for all chef threads to finish
+     */
+    public static void waitForThreads() {
         try {
             for (int i = 0; i < customerThreads.size(); i++) {
                 Thread thread = customerThreads.get(i);
@@ -128,7 +142,6 @@ class RestaurantSimulation {
         } catch (Exception e) {
             System.err.println("Exception in main method (Waiting for threads): " + e.getMessage());
         }
-
     }
 
     //Helper methods --------------------------------------------------------------
