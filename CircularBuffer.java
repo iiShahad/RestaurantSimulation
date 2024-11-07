@@ -1,7 +1,9 @@
+
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 class CircularBuffer<T> {
+
     //Constructor --------------------------------------------------------------------
     private final int maxSize;
     private final Object[] buffer;
@@ -18,9 +20,9 @@ class CircularBuffer<T> {
     //Global variables --------------------------------------------------------------
     private int head = 0;
     private int tail = 0;
+    private int size = 0;
 
     private final Lock lock = new ReentrantLock();
-
 
     //add method --------------------------------------------------------------------
     /*
@@ -44,7 +46,7 @@ class CircularBuffer<T> {
     - This allows consumer threads to proceed when there is at least one item in the buffer.
 
     If an exception occurs during any of these steps, it is caught and logged.
-    */
+     */
     public void add(T item) {
         try {
             producingSemaphore.acquire();
@@ -52,6 +54,11 @@ class CircularBuffer<T> {
             try {
                 buffer[head] = item;
                 head = (head + 1) % maxSize;
+                if (size == maxSize) {
+                    tail = (tail + 1) % maxSize;
+                } else {
+                    size++;
+                }
             } finally {
                 lock.unlock();
             }
@@ -83,7 +90,7 @@ class CircularBuffer<T> {
 
     5. Release a permit to the `producingSemaphore` to signal that there is space available in the buffer for new items.
     - This allows producer threads to proceed when there is space to add new items.
-    */
+     */
     public Object remove() {
         Object item = null;
         try {
@@ -91,8 +98,8 @@ class CircularBuffer<T> {
             lock.lock();
             try {
                 item = buffer[tail];
-                buffer[tail] = null;
                 tail = (tail + 1) % maxSize;
+                size--;
             } finally {
                 lock.unlock();
             }
@@ -107,11 +114,11 @@ class CircularBuffer<T> {
 
     //getters --------------------------------------------------------------------
     public boolean isFull() {
-        return head == tail && buffer[head] != null;
+        return size == maxSize;
     }
 
     public boolean isEmpty() {
-        return head == tail && buffer[head] == null;
+        return size == 0;
     }
 
     @Override
