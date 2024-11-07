@@ -17,17 +17,15 @@ class RestaurantSimulation {
     static int numWaiters;
     static int numTables;
 
-    static Map<Integer, CustomerData> customerServingTimeline = new HashMap<>();
+    static Map<Integer, CustomerData> customerServingData = new HashMap<>();
     static HashMap<String, Integer> meals = new HashMap<>();
 
     static PriorityQueue<Customer> customerArrivalQueue = new PriorityQueue<>(); //PriorityQueue to store customers in arrival time order
-
 
     static Chef[] chefs;
 
     static CircularBuffer<Order> orderBuffer; //CircularBuffer to store orders
     static BoundedQueue<Customer> tableQueue; //PriorityQueue to store customers in arrival time order
-
 
     static List<Thread> customerThreads = new ArrayList<>(); //List to store customer threads
     static List<Thread> chefThreads = new ArrayList<>(); //List to store chef threads
@@ -56,7 +54,6 @@ class RestaurantSimulation {
             tableQueue = new BoundedQueue<Customer>(numTables);
             chefs = new Chef[numChefs];
 
-
             readCustomers(br);
 
         } catch (Exception e) {
@@ -81,7 +78,7 @@ class RestaurantSimulation {
             }
 
             for (int i = 0; i < numChefs; i++) {
-                chefs[i] = new Chef(i+1, orderBuffer, tableQueue);
+                chefs[i] = new Chef(i + 1, orderBuffer, tableQueue);
                 chefThreads.add(chefs[i]);
                 chefs[i].start();
             }
@@ -122,8 +119,8 @@ class RestaurantSimulation {
                 }
             }
 
-            for(int i = 0; i< customerServingTimeline.size(); i++){
-                CustomerData customerData = customerServingTimeline.get(i);
+            for (int i = 0; i < customerServingData.size(); i++) {
+                CustomerData customerData = customerServingData.get(i);
                 CustomerData.printEvents(customerData);
                 System.out.println();
             }
@@ -205,7 +202,7 @@ class RestaurantSimulation {
                 }
                 int preparingTime = meals.get(order);
                 Order newOrder = new Order(order, preparingTime, customerId);
-                Customer customer = new Customer(customerId, arrivalTime, newOrder, orderBuffer, tableQueue,customerServingTimeline);
+                Customer customer = new Customer(customerId, arrivalTime, newOrder, orderBuffer, tableQueue, customerServingData);
                 customerArrivalQueue.add(customer);
             }
         } catch (Exception e) {
