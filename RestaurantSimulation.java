@@ -1,7 +1,8 @@
-
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,6 +44,9 @@ class RestaurantSimulation {
 
         //Wait for threads
         waitForThreads();
+
+        //Write the customer serving data to the output file
+        writeToOutputFile("restaurant_simulation_output.txt");
     }
 
     //Read input files --------------------------------------------------------------
@@ -132,15 +136,24 @@ class RestaurantSimulation {
                     }
                 }
             }
-
-            for (int i = 0; i < customerServingData.size(); i++) {
-                CustomerData customerData = customerServingData.get(i);
-                CustomerData.printEvents(customerData);
-                System.out.println();
-            }
-
         } catch (Exception e) {
             System.err.println("Exception in main method (Waiting for threads): " + e.getMessage());
+        }
+    }
+
+    //Write the customer serving data to the output file ----------------------------
+    public static void writeToOutputFile(String outputFile) {
+        try {
+            //Create a new file writer
+            FileWriter writer = new FileWriter(outputFile);
+            //Write the serving data for each customer
+            for (CustomerData data : customerServingData.values()) {
+                writer.write(data.toString());
+            }
+            //Close the writer
+            writer.close();
+        } catch (IOException e) {
+            System.err.println("Error writing to output file: " + e.getMessage());
         }
     }
 

@@ -42,32 +42,45 @@ class CustomerData {
         return events;
     }
 
-    //This method prints the events of a customer, including arrival, seating, ordering, chef start, chef finish, serving, and leaving.
-    public static void printEvents(CustomerData customerData) {
+    public String toString(CustomerData customerData) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+        StringBuilder events = new StringBuilder();
 
-        // Ensure we only print each event once
         if (customerData.events.containsKey("Arrival")) {
-            System.out.printf("[%s] Customer %d arrives.%n", customerData.events.get("Arrival").format(formatter), customerData.customerId);
+            events.append(String.format("[%s] Customer %d arrives.%n",
+                    customerData.events.get("Arrival").format(formatter), customerData.customerId));
         }
         if (customerData.events.containsKey("Seated")) {
-            System.out.printf("[%s] Customer %d is seated at Table %d%n", customerData.events.get("Seated").format(formatter), customerData.customerId, customerData.tableIndex);
+            events.append(String.format("[%s] Customer %d is seated at Table %d%n",
+                    customerData.events.get("Seated").format(formatter), customerData.customerId, customerData.tableIndex));
         }
         if (customerData.events.containsKey("Order")) {
-            System.out.printf("[%s] Customer %d places an order: %s%n", customerData.events.get("Order").format(formatter), customerData.customerId, customerData.order.getMealName());
+            events.append(String.format("[%s] Customer %d places an order: %s%n",
+                    customerData.events.get("Order").format(formatter), customerData.customerId, customerData.order.getMealName()));
         }
         if (customerData.events.containsKey("ChefStart")) {
-            System.out.printf("[%s] Chef %d starts preparing %s for Customer %d%n", customerData.events.get("ChefStart").format(formatter), customerData.chefId, customerData.order.getMealName(), customerData.customerId);
+            events.append(String.format("[%s] Chef %d starts preparing %s for Customer %d%n",
+                    customerData.events.get("ChefStart").format(formatter), customerData.chefId,
+                    customerData.order.getMealName(), customerData.customerId));
         }
         if (customerData.events.containsKey("ChefFinish")) {
-            System.out.printf("[%s] Chef %d finishes preparing %s for Customer %d%n", customerData.events.get("ChefFinish").format(formatter), customerData.chefId, customerData.order.getMealName(), customerData.customerId);
+            events.append(String.format("[%s] Chef %d finishes preparing %s for Customer %d%n",
+                    customerData.events.get("ChefFinish").format(formatter), customerData.chefId,
+                    customerData.order.getMealName(), customerData.customerId));
         }
         if (customerData.events.containsKey("Serve")) {
-            System.out.printf("[%s] Waiter %d serves %s to Customer %d at Table %d%n", customerData.events.get("Serve").format(formatter), customerData.waiterId, customerData.order.getMealName(), customerData.customerId, customerData.tableIndex);
+            events.append(String.format("[%s] Waiter %d serves %s to Customer %d at Table %d%n",
+                    customerData.events.get("Serve").format(formatter), customerData.waiterId,
+                    customerData.order.getMealName(), customerData.customerId, customerData.tableIndex));
         }
         if (customerData.events.containsKey("Leave")) {
-            System.out.printf("[%s] Customer %d finishes eating and leaves the restaurant.%n", customerData.events.get("Leave").format(formatter), customerData.customerId);
-            System.out.printf("[%s] Table %d is now available.%n", customerData.events.get("Leave").format(formatter), customerData.tableIndex);
+            events.append(String.format("[%s] Customer %d finishes eating and leaves the restaurant.%n",
+                    customerData.events.get("Leave").format(formatter), customerData.customerId));
+            events.append(String.format("[%s] Table %d is now available.%n",
+                    customerData.events.get("Leave").format(formatter), customerData.tableIndex));
         }
+
+        return events.toString();
     }
+
 }
