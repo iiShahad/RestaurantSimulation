@@ -61,7 +61,7 @@ class BoundedQueue<T> {
             }
             consumingSemaphore.release(); // Signal that an item is available to consume
         } catch (Exception e) {
-            System.err.println("Exception in add method: " + e.getMessage());
+            System.err.println("Exception in queue add method: " + e.getMessage());
         }
         return index;
     }
@@ -104,7 +104,7 @@ class BoundedQueue<T> {
             }
             producingSemaphore.release(); // Signal that there is space in the queue
         } catch (Exception e) {
-            System.err.println("Exception in remove method: " + e.getMessage());
+            System.err.println("Exception in queue remove method: " + e.getMessage());
         }
         return item;
     }

@@ -48,18 +48,18 @@ class Chef extends Thread {
 
                     //retrieve order from buffer
                     Order orderMeal = (Order) orderBuffer.remove();
-                    orderMeal.markOrderStart(this.id);
 
                     System.out.println("Chef " + id + " is preparing " + orderMeal.getMealName() + " for Customer " + orderMeal.getCustomerId());
+                    orderMeal.markOrderStart(this.id);
 
                     mutex.release(); //Release the mutex lock
 
                     //simulate meal preparation time
-                    Thread.sleep(1000 * orderMeal.getMealTime() * 60);
+                    Thread.sleep(1000 * orderMeal.getMealTime() * 10);
                     System.out.println("Chef " + id + " has prepared " + orderMeal.getMealName() + " for Customer " + orderMeal.getCustomerId());
 
                     //mark order as ready and notify customer
-                    orderMeal.markOrderReady(this.id);
+                    orderMeal.markOrderReady();
                 } finally {
                     //Ensure mutex is released in case of exception
                     if (mutex.getCurrentPermits() == 0) {
