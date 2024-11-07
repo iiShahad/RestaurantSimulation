@@ -23,7 +23,6 @@ class BoundedQueue<T> {
     private final Lock lock = new ReentrantLock();
 
     //add method --------------------------------------------------------------------
-    // Add an item to the queue
     /*
     This method is used to add an item to the queue while managing access with semaphores and ensuring thread-safe operations.
 
