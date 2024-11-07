@@ -22,6 +22,7 @@ class Order {
     private final Condition orderReadyCondition = lock.newCondition();
     private final Condition orderStartedCondition = lock.newCondition(); 
     private boolean orderReady = false;
+    private boolean orderStart = false;
 
     //waitUntilOrderReady method ----------------------------------------------------
     /*
@@ -44,7 +45,7 @@ class Order {
     Returns:
     - The method returns the `chefId`, which represents the chef who prepared the order. This can be used by the customer to know which chef completed their meal.
     */
-    public int waitUntilOrderReady() {
+    public void waitUntilOrderReady() {
         lock.lock();
         try {
             while (!orderReady) {
@@ -55,13 +56,12 @@ class Order {
         } finally {
             lock.unlock();
         }
-        return chefId;
     }
 
     public int waitUntilOrderStart() {
         lock.lock();
         try {
-            while (!orderReady) {
+            while (!orderStart) {
                 orderStartedCondition.await(); //thread will keep waiting until order is ready
             }
         } catch (Exception e) {
@@ -91,11 +91,10 @@ class Order {
 
     6. Finally, release the lock using `lock.unlock()` to allow other threads to access the shared resource.
      */
-    public void markOrderReady(int chefId) {
+    public void markOrderReady() {
         lock.lock();
         try {
             orderReady = true;
-            this.chefId = chefId;
             orderReadyCondition.signal();
         } catch (Exception e) {
             System.err.println("Exception in markOrderReady: " + e.getMessage());
@@ -107,7 +106,7 @@ class Order {
     public void markOrderStart(int chefId) {
         lock.lock();
         try {
-            orderReady = true;
+            orderStart = true;
             this.chefId = chefId;
             orderStartedCondition.signal();
         } catch (Exception e) {
