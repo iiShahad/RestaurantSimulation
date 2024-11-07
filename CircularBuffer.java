@@ -97,9 +97,11 @@ class CircularBuffer<T> {
             consumingSemaphore.acquire();
             lock.lock();
             try {
-                item = buffer[tail];
-                tail = (tail + 1) % maxSize;
-                size--;
+                if (size > 0) {
+                    item = buffer[tail];
+                    tail = (tail + 1) % maxSize;
+                    size--;
+                }
             } finally {
                 lock.unlock();
             }
