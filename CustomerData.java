@@ -3,7 +3,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 
-//This class is a wrapper class
+//This class is a wrapper class, which stores the data of a customer, including the customer ID, chef ID, waiter ID, events, order, and table index.
 class CustomerData {
 
     private int customerId;
@@ -42,6 +42,7 @@ class CustomerData {
         return events;
     }
 
+    //This method prints the events of a customer, including arrival, seating, ordering, chef start, chef finish, serving, and leaving.
     public static void printEvents(CustomerData customerData) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
 
