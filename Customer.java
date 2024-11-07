@@ -1,8 +1,8 @@
 
 import java.time.Duration;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.Map;
 
 class Customer extends Thread implements Comparable<Customer> {
 
@@ -13,17 +13,18 @@ class Customer extends Thread implements Comparable<Customer> {
     private final Order order;
     private final CircularBuffer<Order> orderBuffer;
     private final BoundedQueue<Customer> tableBuffer;
-    private final HashMap<String, Integer> meals;
+    private final Map<Integer, CustomerData> customerServingTimeline;
+
     private int delay;
 
-    public Customer(int id, LocalTime arrivalTime, Order order, CircularBuffer<Order> orderBuffer, BoundedQueue<Customer> tableBuffer, HashMap<String, Integer> meals) {
+    public Customer(int id, LocalTime arrivalTime, Order order, CircularBuffer<Order> orderBuffer, BoundedQueue<Customer> tableBuffer, Map<Integer, CustomerData> customerServingTimeline) {
         this.id = id;
         this.arrivalTime = arrivalTime;
         this.serveTime = arrivalTime;
         this.order = order;
         this.orderBuffer = orderBuffer;
         this.tableBuffer = tableBuffer;
-        this.meals = meals;
+        this.customerServingTimeline = customerServingTimeline;
     }
 
     private final HashMap<String, LocalTime> timeline = new HashMap<>();
@@ -46,20 +47,28 @@ class Customer extends Thread implements Comparable<Customer> {
             timeline.put("Arrival", arrivalTime);
             LocalTime operationStart = LocalTime.now();
             //customer is seated
-            tableBuffer.add(this);
+            System.out.println("Customer " + id + " is seated at Table");
+            int tableIndex = tableBuffer.add(this) + 1;
+
             timeline.put("Seated", getTimeDifference(operationStart));
             //customer places order
+            System.out.println("Customer " + id + " places an order: " + order.getMealName());
             orderBuffer.add(order);
             timeline.put("Order", getTimeDifference(operationStart));
             //customer waits for order
+            System.out.println("Customer " + id + " is waiting for the order to be ready.");
             timeline.put("ChefStart", getTimeDifference(operationStart));
             int chefId = order.waitUntilOrderReady();
+            System.out.println("Customer " + id + " receives the order from Chef " + chefId);
             timeline.put("ChefFinish", getTimeDifference(operationStart));
+            System.out.println("Customer " + id + " starts eating.");
             timeline.put("Leave", getTimeDifference(operationStart));
             this.serveTime = getTimeDifference(operationStart);
-            Customer removed = (Customer) tableBuffer.remove();
+
+            CustomerData customerData = new CustomerData(id, chefId, 1, timeline, order, tableIndex);
+            customerServingTimeline.put((this.id - 1), customerData);
+            Customer removed = (Customer) tableBuffer.remove(tableIndex);
             System.out.println("Customer " + removed.id + " has left the restaurant.");
-            printEvents(timeline, this.id, chefId, 1);
         } catch (Exception e) {
             System.err.println("Exception in run method: " + e.getMessage());
         }
@@ -99,31 +108,4 @@ class Customer extends Thread implements Comparable<Customer> {
         return arrivalTime.plusMinutes(Duration.between(operationStart, LocalTime.now()).toMinutes());
     }
 
-    public void printEvents(HashMap<String, LocalTime> events, int customerId, int chefId, int waiterId) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
-
-        // Ensure we only print each event once
-        if (events.containsKey("Arrival")) {
-            System.out.printf("[%s] Customer %d arrives.%n", events.get("Arrival").format(formatter), customerId);
-        }
-        if (events.containsKey("Seated")) {
-            System.out.printf("[%s] Customer %d is seated at Table 1%n", events.get("Seated").format(formatter), customerId);
-        }
-        if (events.containsKey("Order")) {
-            System.out.printf("[%s] Customer %d places an order: Burger%n", events.get("Order").format(formatter), customerId);
-        }
-        if (events.containsKey("ChefStart")) {
-            System.out.printf("[%s] Chef %d starts preparing Burger for Customer %d%n", events.get("ChefStart").format(formatter), chefId, customerId);
-        }
-        if (events.containsKey("ChefFinish")) {
-            System.out.printf("[%s] Chef %d finishes preparing Burger for Customer %d%n", events.get("ChefFinish").format(formatter), chefId, customerId);
-        }
-        if (events.containsKey("Serve")) {
-            System.out.printf("[%s] Waiter %d serves Burger to Customer %d at Table 1%n", events.get("Serve").format(formatter), waiterId, customerId);
-        }
-        if (events.containsKey("Leave")) {
-            System.out.printf("[%s] Customer %d finishes eating and leaves the restaurant.%n", events.get("Leave").format(formatter), customerId);
-            System.out.printf("[%s] Table 1 is now available.%n", events.get("Leave").format(formatter));
-        }
-    }
 }
