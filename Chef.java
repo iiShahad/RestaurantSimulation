@@ -55,7 +55,7 @@ class Chef extends Thread {
                     mutex.release(); //Release the mutex lock
 
                     //simulate meal preparation time
-                    Thread.sleep(1000 * orderMeal.getMealTime() * 10);
+                    Thread.sleep(1000 * orderMeal.getMealTime() * 60);
                     System.out.println("Chef " + id + " has prepared " + orderMeal.getMealName() + " for Customer " + orderMeal.getCustomerId());
 
                     //mark order as ready and notify customer

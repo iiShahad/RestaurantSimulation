@@ -79,7 +79,7 @@ class Customer extends Thread implements Comparable<Customer> {
     public void run() {
         try {
             System.out.println("delay: " + delay);
-            Thread.sleep((delay > 0) ? delay * 1000 * 10 : 1);
+            Thread.sleep((delay > 0) ? delay * 1000 * 60 : 1);
             System.out.println("Customer " + id + " has arrived.");
 
             //customer arrives
@@ -108,7 +108,7 @@ class Customer extends Thread implements Comparable<Customer> {
 
             //customer starts eating
             System.out.println("Customer " + id + " starts eating.");
-            Thread.sleep(generateRandomEatingTime() * 1000 * 10); //simulate the eating time
+            Thread.sleep(generateRandomEatingTime() * 1000 * 60); //simulate the eating time
 
             //customer finishes eating and leaves
             timeline.put("Leave", getTimeDifference(operationStart)); //add the leave time to the timeline
