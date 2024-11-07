@@ -98,10 +98,11 @@ class Customer extends Thread implements Comparable<Customer> {
 
             //customer waits for order
             System.out.println("Customer " + id + " is waiting for the order to be ready.");
+            int chefId = order.waitUntilOrderStart();
             timeline.put("ChefStart", getTimeDifference(operationStart)); //add the chef start time to the timeline
-            int chefId = order.waitUntilOrderReady(); //wait until the order is ready and get the chef id, the chef will notify the customer when the order is ready
 
             //customer receives order
+            order.waitUntilOrderReady(); //wait until the order is ready and get the chef id, the chef will notify the customer when the order is ready
             System.out.println("Customer " + id + " receives the order from Chef " + chefId);
             timeline.put("ChefFinish", getTimeDifference(operationStart)); //add the chef finish time to the timeline
 

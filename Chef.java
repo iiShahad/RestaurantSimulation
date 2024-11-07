@@ -48,6 +48,8 @@ class Chef extends Thread {
 
                     //retrieve order from buffer
                     Order orderMeal = (Order) orderBuffer.remove();
+                    orderMeal.markOrderStart(this.id);
+
                     System.out.println("Chef " + id + " is preparing " + orderMeal.getMealName() + " for Customer " + orderMeal.getCustomerId());
 
                     mutex.release(); //Release the mutex lock

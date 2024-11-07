@@ -20,6 +20,7 @@ class Order {
     //Global variables --------------------------------------------------------------
     private final Lock lock = new ReentrantLock();
     private final Condition orderReadyCondition = lock.newCondition();
+    private final Condition orderStartedCondition = lock.newCondition(); 
     private boolean orderReady = false;
 
     //waitUntilOrderReady method ----------------------------------------------------
@@ -57,6 +58,20 @@ class Order {
         return chefId;
     }
 
+    public int waitUntilOrderStart() {
+        lock.lock();
+        try {
+            while (!orderReady) {
+                orderStartedCondition.await(); //thread will keep waiting until order is ready
+            }
+        } catch (Exception e) {
+            System.err.println("Exception in waitUntilOrderStart: " + e.getMessage());
+        } finally {
+            lock.unlock();
+        }
+        return chefId;
+    }
+
     //markOrderReady method ---------------------------------------------------------
     /*
     This method is used to mark an order as ready and notify the waiting customer that the order can now be served. It updates the order status and signals the waiting thread (the customer) that the order is ready.
@@ -82,6 +97,19 @@ class Order {
             orderReady = true;
             this.chefId = chefId;
             orderReadyCondition.signal();
+        } catch (Exception e) {
+            System.err.println("Exception in markOrderReady: " + e.getMessage());
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void markOrderStart(int chefId) {
+        lock.lock();
+        try {
+            orderReady = true;
+            this.chefId = chefId;
+            orderStartedCondition.signal();
         } catch (Exception e) {
             System.err.println("Exception in markOrderReady: " + e.getMessage());
         } finally {
