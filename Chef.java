@@ -1,5 +1,3 @@
-
-
 class Chef extends Thread {
     //Constructor --------------------------------------------------------------------
     private final int id;

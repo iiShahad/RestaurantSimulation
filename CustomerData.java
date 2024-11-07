@@ -42,42 +42,43 @@ class CustomerData {
         return events;
     }
 
-    public String toString(CustomerData customerData) {
+    @Override
+    public String toString() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
         StringBuilder events = new StringBuilder();
 
-        if (customerData.events.containsKey("Arrival")) {
+        if (this.events.containsKey("Arrival")) {
             events.append(String.format("[%s] Customer %d arrives.%n",
-                    customerData.events.get("Arrival").format(formatter), customerData.customerId));
+                    this.events.get("Arrival").format(formatter), this.customerId));
         }
-        if (customerData.events.containsKey("Seated")) {
+        if (this.events.containsKey("Seated")) {
             events.append(String.format("[%s] Customer %d is seated at Table %d%n",
-                    customerData.events.get("Seated").format(formatter), customerData.customerId, customerData.tableIndex));
+                    this.events.get("Seated").format(formatter), this.customerId, this.tableIndex));
         }
-        if (customerData.events.containsKey("Order")) {
+        if (this.events.containsKey("Order")) {
             events.append(String.format("[%s] Customer %d places an order: %s%n",
-                    customerData.events.get("Order").format(formatter), customerData.customerId, customerData.order.getMealName()));
+                    this.events.get("Order").format(formatter), this.customerId, this.order.getMealName()));
         }
-        if (customerData.events.containsKey("ChefStart")) {
+        if (this.events.containsKey("ChefStart")) {
             events.append(String.format("[%s] Chef %d starts preparing %s for Customer %d%n",
-                    customerData.events.get("ChefStart").format(formatter), customerData.chefId,
-                    customerData.order.getMealName(), customerData.customerId));
+                    this.events.get("ChefStart").format(formatter), this.chefId,
+                    this.order.getMealName(), this.customerId));
         }
-        if (customerData.events.containsKey("ChefFinish")) {
+        if (this.events.containsKey("ChefFinish")) {
             events.append(String.format("[%s] Chef %d finishes preparing %s for Customer %d%n",
-                    customerData.events.get("ChefFinish").format(formatter), customerData.chefId,
-                    customerData.order.getMealName(), customerData.customerId));
+                    this.events.get("ChefFinish").format(formatter), this.chefId,
+                    this.order.getMealName(), this.customerId));
         }
-        if (customerData.events.containsKey("Serve")) {
+        if (this.events.containsKey("Serve")) {
             events.append(String.format("[%s] Waiter %d serves %s to Customer %d at Table %d%n",
-                    customerData.events.get("Serve").format(formatter), customerData.waiterId,
-                    customerData.order.getMealName(), customerData.customerId, customerData.tableIndex));
+                    this.events.get("Serve").format(formatter), this.waiterId,
+                    this.order.getMealName(), this.customerId, this.tableIndex));
         }
-        if (customerData.events.containsKey("Leave")) {
+        if (this.events.containsKey("Leave")) {
             events.append(String.format("[%s] Customer %d finishes eating and leaves the restaurant.%n",
-                    customerData.events.get("Leave").format(formatter), customerData.customerId));
+                    this.events.get("Leave").format(formatter), this.customerId));
             events.append(String.format("[%s] Table %d is now available.%n",
-                    customerData.events.get("Leave").format(formatter), customerData.tableIndex));
+                    this.events.get("Leave").format(formatter), this.tableIndex));
         }
 
         return events.toString();
