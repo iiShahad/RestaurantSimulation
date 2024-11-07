@@ -94,7 +94,7 @@ class RestaurantSimulation {
             }
 
             for (int i = 0; i < numChefs; i++) {
-
+                chefs[i] = new Chef(i+1, orderBuffer);
                 chefThreads.add(chefs[i]);
                 chefs[i].start();
             }
