@@ -81,6 +81,8 @@ class CustomerData {
                     this.events.get("Leave").format(formatter), this.tableIndex));
         }
 
+        events.append("\n");
+
         return events.toString();
     }
 
