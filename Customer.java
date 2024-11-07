@@ -117,7 +117,7 @@ class Customer extends Thread implements Comparable<Customer> {
             //remove the customer from the tableQueue
             CustomerData customerData = new CustomerData(id, chefId, 1, timeline, order, tableIndex); //create a new CustomerData object to store the customer data
             customerServingData.put((this.id - 1), customerData); //add the customer data to the customerServingTimeline
-            Customer removed = (Customer) tableQueue.remove(tableIndex); //remove the customer from the tableQueue
+            Customer removed = (Customer) tableQueue.remove(tableIndex - 1); //remove the customer from the tableQueue
             System.out.println("Customer " + removed.id + " has left the restaurant.");
         } catch (Exception e) {
             System.err.println("Exception in run method: " + e.getMessage());
