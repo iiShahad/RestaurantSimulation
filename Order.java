@@ -10,6 +10,7 @@ class Order {
     private final int mealTime;
     private final int customerId;
     private int chefId;
+    private int waiterId;
 
     public Order(String mealName, int mealTime, int customerId) {
         this.mealName = mealName;
@@ -21,9 +22,13 @@ class Order {
     private final Lock lock = new ReentrantLock();
     private final Condition orderReadyCondition = lock.newCondition();
     private final Condition orderStartedCondition = lock.newCondition(); 
+    private final Condition orderServingCondition = lock.newCondition();
+    private final Condition orderServedCondition = lock.newCondition();
+
     private boolean orderReady = false;
     private boolean orderStart = false;
-
+    private boolean orderServing = false;
+    private boolean orderServed = false;
     //waitUntilOrderReady method ----------------------------------------------------
     /*
     This method is used to make a thread wait until the order is ready for the customer. It ensures proper synchronization and avoids busy-waiting using the `Condition` variable.
@@ -45,6 +50,36 @@ class Order {
     Returns:
     - The method returns the `chefId`, which represents the chef who prepared the order. This can be used by the customer to know which chef completed their meal.
     */
+
+
+    public void waitUntilOrderServed() {
+        lock.lock();
+        try {
+            while (!orderServed) {
+                orderServedCondition.await(); //thread will keep waiting until order is Served
+            }
+        } catch (Exception e) {
+            System.err.println("Exception in waitUntilOrderServed: " + e.getMessage());
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public int waitUntilOrderServing() {
+        lock.lock();
+        try {
+            while (!orderServing) {
+                orderServingCondition.await(); //thread will keep waiting until order is serving
+            }
+        } catch (Exception e) {
+            System.err.println("Exception in waitUntilOrderServing: " + e.getMessage());
+        } finally {
+            lock.unlock();
+        }
+        return waiterId;
+    }
+
+
     public void waitUntilOrderReady() {
         lock.lock();
         try {
@@ -91,6 +126,31 @@ class Order {
 
     6. Finally, release the lock using `lock.unlock()` to allow other threads to access the shared resource.
      */
+    public void markOrderServed() {
+        lock.lock();
+        try {
+            orderServed = true;
+            orderServedCondition.signal();
+        } catch (Exception e) {
+            System.err.println("Exception in markOrderServed: " + e.getMessage());
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public void markOrderServing(int waiterId) {
+        lock.lock();
+        try {
+            orderServing=true;
+            this.waiterId=waiterId;
+            orderServingCondition.signal();
+        } catch (Exception e) {
+            System.err.println("Exception in markOrderServing: " + e.getMessage());
+        } finally {
+            lock.unlock();
+        }
+    }
+
     public void markOrderReady() {
         lock.lock();
         try {

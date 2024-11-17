@@ -96,16 +96,25 @@ class Customer extends Thread implements Comparable<Customer> {
             orderBuffer.add(order); //add the order to the orderBuffer
             timeline.put("Order", getTimeDifference(operationStart)); //add the order time to the timeline
 
-            //customer waits for order
+            //customer wait for the chef to start preparing the order
             System.out.println("Customer " + id + " is waiting for the order to be ready.");
             int chefId = order.waitUntilOrderStart();
             timeline.put("ChefStart", getTimeDifference(operationStart)); //add the chef start time to the timeline
 
-            //customer receives order
-            order.waitUntilOrderReady(); //wait until the order is ready and get the chef id, the chef will notify the customer when the order is ready
-            System.out.println("Customer " + id + " receives the order from Chef " + chefId);
+            //customer wait for order to be ready
+            order.waitUntilOrderReady(); //wait until the order is ready and get the chef id, the chef will notify the waiter when the order is ready
+            System.out.println("Order of Customer " + id + "has been prepared by chef " + chefId);
             timeline.put("ChefFinish", getTimeDifference(operationStart)); //add the chef finish time to the timeline
 
+            //customer wait for waiter to start serve his order
+            System.out.println("Customer " + id + " is waiting for the order to start serving.");
+            int waiterId =order.waitUntilOrderServing();  
+
+            //customer receives order
+            order.waitUntilOrderServed();
+            System.out.println("Order of Customer " + id + "has been served by waiter " + waiterId);
+            timeline.put("Serve", getTimeDifference(operationStart));
+            
             //customer starts eating
             System.out.println("Customer " + id + " starts eating.");
             Thread.sleep(generateRandomEatingTime() * 1000 * 60); //simulate the eating time

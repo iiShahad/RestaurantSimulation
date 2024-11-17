@@ -2,10 +2,12 @@ class Chef extends Thread {
     //Constructor --------------------------------------------------------------------
     private final int id;
     private final CircularBuffer<Order> orderBuffer;
+    private final CircularBuffer<Order> readyOrderBuffer;
 
-    public Chef(int id, CircularBuffer<Order> orderBuffer) {
+    public Chef(int id, CircularBuffer<Order> orderBuffer,CircularBuffer<Order> readyOrderBuffer) {
         this.id = id;
         this.orderBuffer = orderBuffer;
+        this.readyOrderBuffer=readyOrderBuffer;
     }
 
     //Global variables --------------------------------------------------------------
@@ -58,6 +60,8 @@ class Chef extends Thread {
                     Thread.sleep(1000 * orderMeal.getMealTime() * 60);
                     System.out.println("Chef " + id + " has prepared " + orderMeal.getMealName() + " for Customer " + orderMeal.getCustomerId());
 
+                    //add order to ready order buffer to be served
+                    readyOrderBuffer.add(orderMeal);
                     //mark order as ready and notify customer
                     orderMeal.markOrderReady();
                 } finally {

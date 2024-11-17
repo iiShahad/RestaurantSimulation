@@ -23,12 +23,17 @@ class RestaurantSimulation {
     static HashMap<String, Integer> meals = new HashMap<>(); //HashMap to store meal names and preparation times
 
     static Chef[] chefs; //Array to store chef instances
+    static Waiter[] waiters; //Array to store waiter instances
 
     static CircularBuffer<Order> orderBuffer; //CircularBuffer to store orders
-    static BoundedQueue<Customer> tableQueue; //tableQueue to store customers in tables and sort them by serving time
+    static CircularBuffer<Order> readyOrderBuffer; //CircularBuffer to store ready orders
+    static BoundedQueue<Customer> tableQueue; //tableQueue to store customers in tables and sort them by serving time 
+   
+
 
     static List<Thread> customerThreads = new ArrayList<>(); //List to store customer threads
     static List<Thread> chefThreads = new ArrayList<>(); //List to store chef threads
+    static List<Thread> waiterThreads = new ArrayList<>(); //List to store waiter threads
 
     public static void main(String[] args) throws FileNotFoundException {
         //input files 
@@ -67,6 +72,7 @@ class RestaurantSimulation {
             orderBuffer = new CircularBuffer<>(numTables);
             tableQueue = new BoundedQueue<>(numTables);
             chefs = new Chef[numChefs];
+            waiters = new Waiter[numWaiters];
 
             readCustomers(br);
 
@@ -94,10 +100,21 @@ class RestaurantSimulation {
             }
 
             for (int i = 0; i < numChefs; i++) {
-                chefs[i] = new Chef(i+1, orderBuffer);
+                chefs[i] = new Chef(i+1, orderBuffer,readyOrderBuffer);
                 chefThreads.add(chefs[i]);
                 chefs[i].start();
             }
+
+            for (int i = 0; i < numWaiters; i++) {
+                waiters[i] = new Waiter(i+1, readyOrderBuffer);
+                waiterThreads.add(waiters[i]);
+                waiters[i].start();
+            }
+
+
+
+
+
         } catch (Exception e) {
             System.err.println("Exception in main method (Simulation): " + e.getMessage());
         }
@@ -136,6 +153,26 @@ class RestaurantSimulation {
                     }
                 }
             }
+
+            if (waiters == null) {
+                System.out.println("Error: waiters array is null.");
+            } else {
+                // End waiters for all chefs
+                for (Waiter waiter : waiters) {
+                    waiter.endWaiter();
+                }
+                // Wait for waiter threads with timeout
+                for (int i = 0; i < waiterThreads.size(); i++) {
+                    Thread thread = waiterThreads.get(i);
+                    thread.join(TimeUnit.MINUTES.toMillis(10)); // Add timeout of 10 minutes for each thread
+                    if (thread.isAlive()) {
+                        System.out.println("WARNING: waiter thread " + (i + 1) + " did not finish within timeout, Thread state: " + thread.getState());
+                    }
+                }
+            }
+
+
+
         } catch (Exception e) {
             System.err.println("Exception in main method (Waiting for threads): " + e.getMessage());
         }

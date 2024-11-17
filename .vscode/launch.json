@@ -5,6 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "type": "java",
+            "name": "RestaurantSimulation",
+            "request": "launch",
+            "mainClass": "RestaurantSimulation",
+            "projectName": "restaurant_simulation_43284659"
+        },
+        {
             "type": "jdk",
             "request": "launch",
             "name": "Launch Java App"

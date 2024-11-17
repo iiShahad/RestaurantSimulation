@@ -148,6 +148,11 @@ class BoundedQueue<T> {
         return queue.size();
     }
 
+    public Object peek() {
+        Object item=queue.peek();
+        return item;
+    }
+
     @Override
     public String toString() {
         return queue.toString();
