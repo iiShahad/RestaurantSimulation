@@ -114,7 +114,7 @@ class RestaurantSimulation {
         try {
             for (int i = 0; i < customerThreads.size(); i++) {
                 Thread thread = customerThreads.get(i);
-                thread.join(TimeUnit.MINUTES.toMillis(10)); // Add timeout of 10 minutes for each thread
+                thread.join(TimeUnit.MINUTES.toMillis(2)); // Add timeout of 10 minutes for each thread
                 if (thread.isAlive()) {
                     System.out.println("WARNING: Customer thread " + (i + 1) + " did not finish within timeout, Thread state: " + thread.getState());
                 }
@@ -130,7 +130,7 @@ class RestaurantSimulation {
                 // Wait for chef threads with timeout
                 for (int i = 0; i < chefThreads.size(); i++) {
                     Thread thread = chefThreads.get(i);
-                    thread.join(TimeUnit.MINUTES.toMillis(10)); // Add timeout of 10 minutes for each thread
+                    thread.join(TimeUnit.MINUTES.toMillis(2)); // Add timeout of 10 minutes for each thread
                     if (thread.isAlive()) {
                         System.out.println("WARNING: Chef thread " + (i + 1) + " did not finish within timeout, Thread state: " + thread.getState());
                     }

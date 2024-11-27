@@ -9,7 +9,7 @@ class Chef extends Thread {
     }
 
     //Global variables --------------------------------------------------------------
-    CustomSemaphore mutex = new CustomSemaphore(1);
+    static CustomSemaphore mutex = new CustomSemaphore(1);
     boolean endShift = false;
 
     //Thread run method -------------------------------------------------------------
@@ -55,7 +55,7 @@ class Chef extends Thread {
                     mutex.release(); //Release the mutex lock
 
                     //simulate meal preparation time
-                    Thread.sleep(1000 * orderMeal.getMealTime() * 60);
+                    Thread.sleep((long)(1000 * orderMeal.getMealTime() * 60 * 0.1));
                     System.out.println("Chef " + id + " has prepared " + orderMeal.getMealName() + " for Customer " + orderMeal.getCustomerId());
 
                     //mark order as ready and notify customer
