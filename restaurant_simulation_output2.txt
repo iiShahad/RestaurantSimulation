@@ -1,0 +1,53 @@
+[09:00] Customer 1 arrives.
+[09:00] Customer 1 is seated at Table 1
+[09:00] Customer 1 places an order: Salad
+[09:00] Chef 1 starts preparing Salad for Customer 1
+[09:05] Chef 1 finishes preparing Salad for Customer 1
+[09:14] Waiter 1 serves Salad to Customer 1 at Table 1
+[09:22] Customer 1 finishes eating and leaves the restaurant.
+[09:22] Table 1 is now available.
+
+[09:03] Customer 2 arrives.
+[09:03] Customer 2 is seated at Table 2
+[09:03] Customer 2 places an order: Burger
+[09:05] Chef 1 starts preparing Burger for Customer 2
+[09:13] Chef 1 finishes preparing Burger for Customer 2
+[09:18] Waiter 2 serves Burger to Customer 2 at Table 2
+[09:28] Customer 2 finishes eating and leaves the restaurant.
+[09:28] Table 2 is now available.
+
+[09:05] Customer 3 arrives.
+[09:05] Customer 3 is seated at Table 3
+[09:05] Customer 3 places an order: Pizza
+[09:13] Chef 1 starts preparing Pizza for Customer 3
+[09:23] Chef 1 finishes preparing Pizza for Customer 3
+[09:31] Waiter 1 serves Pizza to Customer 3 at Table 3
+[09:38] Customer 3 finishes eating and leaves the restaurant.
+[09:38] Table 3 is now available.
+
+[09:07] Customer 4 arrives.
+[09:22] Customer 4 is seated at Table 1
+[09:22] Customer 4 places an order: Pasta
+[09:23] Chef 1 starts preparing Pasta for Customer 4
+[09:33] Chef 1 finishes preparing Pasta for Customer 4
+[09:41] Waiter 2 serves Pasta to Customer 4 at Table 1
+[09:51] Customer 4 finishes eating and leaves the restaurant.
+[09:51] Table 1 is now available.
+
+[09:09] Customer 5 arrives.
+[09:28] Customer 5 is seated at Table 2
+[09:28] Customer 5 places an order: Steak
+[09:33] Chef 1 starts preparing Steak for Customer 5
+[09:41] Chef 1 finishes preparing Steak for Customer 5
+[09:51] Waiter 1 serves Steak to Customer 5 at Table 2
+[10:01] Customer 5 finishes eating and leaves the restaurant.
+[10:01] Table 2 is now available.
+
+
+[End of Simulation]
+
+Summary:
+- Total Customers Served: 5
+- Average Wait Time for Table: 6 Minutes
+- Average Order Preparation Time: 11 Minutes
+- Total Simulation Time: 61 Minutes

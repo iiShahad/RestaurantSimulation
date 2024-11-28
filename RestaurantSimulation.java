@@ -15,53 +15,48 @@ import java.util.concurrent.TimeUnit;
 
 class RestaurantSimulation {
 
-    //Global variables --------------------------------------------------------------
     static int numChefs;
     static int numWaiters;
     static int numTables;
 
-    static PriorityQueue<Customer> customerArrivalQueue = new PriorityQueue<>(); //PriorityQueue to store customers in arrival time order
-    static Map<Integer, CustomerData> customerServingData = new HashMap<>();  //HashMap to store customer serving data
-    static HashMap<String, Integer> meals = new HashMap<>(); //HashMap to store meal names and preparation times
+    static PriorityQueue<Customer> customerArrivalQueue = new PriorityQueue<>();
+    static Map<Integer, CustomerData> customerServingData = new HashMap<>();
+    static HashMap<String, Integer> meals = new HashMap<>();
 
-    static Chef[] chefs; //Array to store chef instances
-    static Waiter[] waiters; //Array to store waiter instances
+    static Chef[] chefs;
+    static Waiter[] waiters;
 
-    static CircularBuffer<Order> orderBuffer; //CircularBuffer to store orders
-    static CircularBuffer<Order> readyOrders; //CircularBuffer to store ready orders
-    static BoundedQueue<Customer> tableQueue; //tableQueue to store customers in tables and sort them by serving time
+    static CircularBuffer<Order> orderBuffer;
+    static CircularBuffer<Order> readyOrders;
+    static BoundedQueue<Customer> tableQueue;
 
-    static List<Thread> customerThreads = new ArrayList<>(); //List to store customer threads
-    static List<Thread> chefThreads = new ArrayList<>(); //List to store chef threads
-    static List<Thread> waiterThreads = new ArrayList<>(); //List to store waiter threads
+    static List<Thread> customerThreads = new ArrayList<>();
+    static List<Thread> chefThreads = new ArrayList<>();
+    static List<Thread> waiterThreads = new ArrayList<>();
 
     public static void main(String[] args) throws FileNotFoundException {
-        //input files 
-        String inputFile1 = "restaurant_simulation_input1.txt";
-        String inputFile2 = "restaurant_simulation_input2.txt";
-        String inputFile3 = "restaurant_simulation_input3.txt";
+        String[] inputFiles = {"restaurant_simulation_input1.txt", "restaurant_simulation_input2.txt", "restaurant_simulation_input3.txt"};
 
-        //Read input files 
-        readAndInitializeData(inputFile1);
+        for (int i = 0; i < inputFiles.length; i++) {
+            System.out.println("\n[Simulation " + (i + 1) + "]\n");
+            //Read input files 
+            readAndInitializeData(inputFiles[i]);
 
-        //Start simulation
-        startThreads();
+            //Start simulation
+            startThreads();
 
-        //Wait for threads
-        waitForThreads();
+            //Wait for threads
+            waitForThreads();
 
-        //Write the customer serving data to the output file
-        writeToOutputFile("restaurant_simulation_output.txt");
+            //Write the customer serving data to the output file
+            writeToOutputFile("restaurant_simulation_output%d.txt".formatted(i + 1));
+
+            //Reset everything
+            reset();
+        }
+
     }
 
-    //Read input files --------------------------------------------------------------
-    /*
-    What we need to do:
-    1. Read the configuration from the first line of the input file
-    2. Read the meals from the second line of the input file
-    3. Read the customers from the rest of the lines of the input file
-    4. Create and initialize the buffers and arrays 
-     */
     public static void readAndInitializeData(String inputFile) {
         try {
             FileReader fr = new FileReader(inputFile);
@@ -82,13 +77,6 @@ class RestaurantSimulation {
         }
     }
 
-    //Start simulation --------------------------------------------------------------
-    /*
-    What we need to do:
-    1. Calculate the delay time for each customer
-    2. Start the customer threads
-    3. Start the chef threads
-     */
     public static void startThreads() {
         try {
             arrivalTimeToDelay();
@@ -116,18 +104,11 @@ class RestaurantSimulation {
         }
     }
 
-    //Wait for threads --------------------------------------------------------------
-    /*
-    What we need to do:
-    1. Wait for all customer threads to finish
-    2. End the shifts for all chefs
-    3. Wait for all chef threads to finish
-     */
     public static void waitForThreads() {
         try {
             for (int i = 0; i < customerThreads.size(); i++) {
                 Thread thread = customerThreads.get(i);
-                thread.join(TimeUnit.MINUTES.toMillis(2)); // Add timeout of 10 minutes for each thread
+                thread.join(TimeUnit.MINUTES.toMillis(5)); // Add timeout of 5 minutes for each thread
                 if (thread.isAlive()) {
                     System.out.println("WARNING: Customer thread " + (i + 1) + " did not finish within timeout, Thread state: " + thread.getState());
                     printThreadInfo();
@@ -144,7 +125,7 @@ class RestaurantSimulation {
                 // Wait for chef threads with timeout
                 for (int i = 0; i < chefThreads.size(); i++) {
                     Thread thread = chefThreads.get(i);
-                    thread.join(TimeUnit.MINUTES.toMillis(2)); // Add timeout of 10 minutes for each thread
+                    thread.join(TimeUnit.MINUTES.toMillis(5)); // Add timeout of 5 minutes for each thread
                     if (thread.isAlive()) {
                         System.out.println("WARNING: Chef thread " + (i + 1) + " did not finish within timeout, Thread state: " + thread.getState());
                         printThreadInfo();
@@ -155,14 +136,14 @@ class RestaurantSimulation {
             if (waiters == null) {
                 System.out.println("Error: Waiters array is null.");
             } else {
-                // End shifts for all chefs
+                // End shifts for all waiters
                 for (Waiter waiter : waiters) {
                     waiter.endShift();
                 }
-                // Wait for chef threads with timeout
+                // Wait for waiters threads with timeout
                 for (int i = 0; i < waiterThreads.size(); i++) {
                     Thread thread = waiterThreads.get(i);
-                    thread.join(TimeUnit.MINUTES.toMillis(2)); // Add timeout of 10 minutes for each thread
+                    thread.join(TimeUnit.MINUTES.toMillis(5)); // Add timeout of 10 minutes for each thread
                     if (thread.isAlive()) {
                         System.out.println("WARNING: Waiter thread " + (i + 1) + " did not finish within timeout, Thread state: " + thread.getState());
                         printThreadInfo();
@@ -174,29 +155,38 @@ class RestaurantSimulation {
         }
     }
 
-    public static void printThreadInfo() {
-        Thread.getAllStackTraces().keySet().forEach(thread -> {
-            System.out.println("\nThread: " + thread.getName());
-            System.out.println("State: " + thread.getState());
-            for (StackTraceElement stackTrace : thread.getStackTrace()) {
-                System.out.println("    at " + stackTrace);
-            }
-        });
+    public static void reset() {
+        // Clear all thread lists
+        customerThreads.clear();
+        chefThreads.clear();
+        waiterThreads.clear();
+
+        // Clear customer arrival queue
+        customerArrivalQueue.clear();
+
+        // Reinitialize buffers and arrays
+        orderBuffer = new CircularBuffer<>(numTables);
+        readyOrders = new CircularBuffer<>(numTables);
+        tableQueue = new BoundedQueue<>(numTables);
+        chefs = new Chef[numChefs];
+        waiters = new Waiter[numWaiters];
+
+        //reset semaphores for chefs and waiters
+        Waiter.resetSemaphore();
+        Chef.resetSemaphore();
     }
 
-    //Write the customer serving data to the output file ----------------------------
     public static void writeToOutputFile(String outputFile) {
         try {
-            //Create a new file writer
             FileWriter writer = new FileWriter(outputFile);
-            //Write the serving data for each customer
             for (CustomerData data : customerServingData.values()) {
                 writer.write(data.toString());
             }
+
             //Write the summary of the simulation
             writer.write(summaryOfSimulation());
             System.out.println(summaryOfSimulation());
-            //Close the writer
+
             writer.close();
         } catch (IOException e) {
             System.err.println("Error writing to output file: " + e.getMessage());
@@ -230,14 +220,8 @@ class RestaurantSimulation {
         return summary.toString();
     }
 
-
     //Helper methods --------------------------------------------------------------
-    //Calculate the delay time for each customer
-    /*
-    Based on the arrival time of the first customer, calculate the delay time for each customer,
-    by subtracting the arrival time of the first customer from the arrival time of each customer.
-    This will be used to simulate the arrival time of each customer by setting a delay time at the beginning for each customer.
-     */
+    //This method is used to get the delay of each customer based on the arrival time of the first customer
     public static void arrivalTimeToDelay() {
         LocalTime starTime = customerArrivalQueue.peek().getArrivalTime();
         for (Customer customer : customerArrivalQueue) {
@@ -245,6 +229,17 @@ class RestaurantSimulation {
             int delay = (int) (arrivalTime.getMinute() - starTime.getMinute());
             customer.setDelay(delay);
         }
+    }
+
+    //Print the stack trace of all threads to figure out the state of each thread in case of a deadlock or starvation
+    public static void printThreadInfo() {
+        Thread.getAllStackTraces().keySet().forEach(thread -> {
+            System.out.println("\nThread: " + thread.getName());
+            System.out.println("State: " + thread.getState());
+            for (StackTraceElement stackTrace : thread.getStackTrace()) {
+                System.out.println("    at " + stackTrace);
+            }
+        });
     }
 
     //Read the configuration and meals from the input file

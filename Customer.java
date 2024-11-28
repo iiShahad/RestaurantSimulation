@@ -6,8 +6,6 @@ import java.util.Map;
 import java.util.Random;
 
 class Customer extends Thread implements Comparable<Customer> {
-
-    //Constructor --------------------------------------------------------------------
     private final int id;
     private final LocalTime arrivalTime;
     private LocalTime serveTime;
@@ -29,51 +27,6 @@ class Customer extends Thread implements Comparable<Customer> {
     }
 
     private final HashMap<String, LocalTime> timeline = new HashMap<>();
-
-    //Thread run method -------------------------------------------------------------
-    /*
-    What we need to do:
-    // Simulate customer experience in the restaurant
-    /*
-    This function simulates the complete journey of a customer in the restaurant, from arrival to departure. It includes the following steps:
-
-    1. Simulate arrival delay:
-    - apply a delay to simulate the staggered arrival of each customer.
-    - If the delay is greater than 0, wait for the specified duration in minutes; otherwise, wait for 1 millisecond.
-    - This delay allows each customer to arrive at different times.
-
-    2. Record customer arrival:
-    - Capture the starting time of the operation (`operationStart`) to calculate elapsed time for each event.
-    - Store the customer's `arrivalTime` in the timeline map to record the arrival event.
-
-    3. Seat customer at a table:
-    - Add the customer to the `tableQueue`, obtaining the table index where the customer is seated.
-    - Store the time the customer is seated in the timeline, calculated as the time difference from `operationStart`.
-
-    4. Place customer order:
-    - Add the customer's order to the `orderBuffer`, which the chef will process.
-    - Record the order placement time in the timeline.
-
-    5. Wait for order preparation:
-    - Record the time the chef starts preparing the order in the timeline.
-    - Wait until the chef signals that the order is ready, capturing the `chefId` once the order is prepared.
-
-    6. Receive order from chef:
-    - Record the time the chef completes the order in the timeline, indicating the order has been served to the customer.
-
-    7. Simulate eating time:
-    - Apply a delay to simulate the time taken by the customer to eat the meal.
-    - The delay is randomly generated to reflect varied eating durations.
-
-    8. Customer finishes eating and leaves:
-    - Record the time the customer leaves in the timeline.
-    - Calculate and store the total `serveTime`, representing the time since `operationStart`, to allow for sorting customers by their serving duration.
-    
-    9. Remove customer from the table queue and store customer data:
-    - Create a `CustomerData` object to store details such as ID, chef ID, timeline, order, and table index.
-    - Add the customer data to the `customerServingData` map for tracking and historical data.
-    - Remove the customer from the `tableQueue` to free up the table for the next customer.
-     */
 
     @Override
     public void run() {
