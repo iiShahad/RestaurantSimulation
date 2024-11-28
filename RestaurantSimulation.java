@@ -179,6 +179,9 @@ class RestaurantSimulation {
     public static void writeToOutputFile(String outputFile) {
         try {
             FileWriter writer = new FileWriter(outputFile);
+
+            writer.write("Simulation Started with %d Chefs, %d Waiters, and %d Tables.\n\n".formatted(numChefs, numWaiters, numTables));
+            
             for (CustomerData data : customerServingData.values()) {
                 writer.write(data.toString());
             }
