@@ -1,8 +1,10 @@
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.Duration;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -23,12 +25,15 @@ class RestaurantSimulation {
     static HashMap<String, Integer> meals = new HashMap<>(); //HashMap to store meal names and preparation times
 
     static Chef[] chefs; //Array to store chef instances
+    static Waiter[] waiters; //Array to store waiter instances
 
     static CircularBuffer<Order> orderBuffer; //CircularBuffer to store orders
+    static CircularBuffer<Order> readyOrders; //CircularBuffer to store ready orders
     static BoundedQueue<Customer> tableQueue; //tableQueue to store customers in tables and sort them by serving time
 
     static List<Thread> customerThreads = new ArrayList<>(); //List to store customer threads
     static List<Thread> chefThreads = new ArrayList<>(); //List to store chef threads
+    static List<Thread> waiterThreads = new ArrayList<>(); //List to store waiter threads
 
     public static void main(String[] args) throws FileNotFoundException {
         //input files 
@@ -56,7 +61,7 @@ class RestaurantSimulation {
     2. Read the meals from the second line of the input file
     3. Read the customers from the rest of the lines of the input file
     4. Create and initialize the buffers and arrays 
-    */
+     */
     public static void readAndInitializeData(String inputFile) {
         try {
             FileReader fr = new FileReader(inputFile);
@@ -65,8 +70,10 @@ class RestaurantSimulation {
             readConfig(br);
 
             orderBuffer = new CircularBuffer<>(numTables);
+            readyOrders = new CircularBuffer<>(numTables);
             tableQueue = new BoundedQueue<>(numTables);
             chefs = new Chef[numChefs];
+            waiters = new Waiter[numWaiters];
 
             readCustomers(br);
 
@@ -94,9 +101,15 @@ class RestaurantSimulation {
             }
 
             for (int i = 0; i < numChefs; i++) {
-                chefs[i] = new Chef(i+1, orderBuffer);
+                chefs[i] = new Chef(i + 1, orderBuffer, readyOrders);
                 chefThreads.add(chefs[i]);
                 chefs[i].start();
+            }
+
+            for (int i = 0; i < numWaiters; i++) {
+                waiters[i] = new Waiter(i + 1, readyOrders);
+                waiterThreads.add(waiters[i]);
+                waiters[i].start();
             }
         } catch (Exception e) {
             System.err.println("Exception in main method (Simulation): " + e.getMessage());
@@ -117,6 +130,7 @@ class RestaurantSimulation {
                 thread.join(TimeUnit.MINUTES.toMillis(2)); // Add timeout of 10 minutes for each thread
                 if (thread.isAlive()) {
                     System.out.println("WARNING: Customer thread " + (i + 1) + " did not finish within timeout, Thread state: " + thread.getState());
+                    printThreadInfo();
                 }
             }
 
@@ -133,12 +147,41 @@ class RestaurantSimulation {
                     thread.join(TimeUnit.MINUTES.toMillis(2)); // Add timeout of 10 minutes for each thread
                     if (thread.isAlive()) {
                         System.out.println("WARNING: Chef thread " + (i + 1) + " did not finish within timeout, Thread state: " + thread.getState());
+                        printThreadInfo();
+                    }
+                }
+            }
+
+            if (waiters == null) {
+                System.out.println("Error: Waiters array is null.");
+            } else {
+                // End shifts for all chefs
+                for (Waiter waiter : waiters) {
+                    waiter.endShift();
+                }
+                // Wait for chef threads with timeout
+                for (int i = 0; i < waiterThreads.size(); i++) {
+                    Thread thread = waiterThreads.get(i);
+                    thread.join(TimeUnit.MINUTES.toMillis(2)); // Add timeout of 10 minutes for each thread
+                    if (thread.isAlive()) {
+                        System.out.println("WARNING: Waiter thread " + (i + 1) + " did not finish within timeout, Thread state: " + thread.getState());
+                        printThreadInfo();
                     }
                 }
             }
         } catch (Exception e) {
             System.err.println("Exception in main method (Waiting for threads): " + e.getMessage());
         }
+    }
+
+    public static void printThreadInfo() {
+        Thread.getAllStackTraces().keySet().forEach(thread -> {
+            System.out.println("\nThread: " + thread.getName());
+            System.out.println("State: " + thread.getState());
+            for (StackTraceElement stackTrace : thread.getStackTrace()) {
+                System.out.println("    at " + stackTrace);
+            }
+        });
     }
 
     //Write the customer serving data to the output file ----------------------------
@@ -150,12 +193,43 @@ class RestaurantSimulation {
             for (CustomerData data : customerServingData.values()) {
                 writer.write(data.toString());
             }
+            //Write the summary of the simulation
+            writer.write(summaryOfSimulation());
+            System.out.println(summaryOfSimulation());
             //Close the writer
             writer.close();
         } catch (IOException e) {
             System.err.println("Error writing to output file: " + e.getMessage());
         }
     }
+
+    public static String summaryOfSimulation() {
+        double totalWaitTime = 0;
+        double totalOrderPreparationTime = 0;
+
+        for (CustomerData data : customerServingData.values()) {
+            totalWaitTime += Duration.between(data.getEvents().get("Arrival"), data.getEvents().get("Seated")).toMinutes();
+            totalOrderPreparationTime += Duration.between(data.getEvents().get("Order"), data.getEvents().get("ChefFinish")).toMinutes();
+        }
+
+        int totalCustomersServed = customerServingData.size();
+        int averageWaitTime = (int) (totalWaitTime / totalCustomersServed);
+        int averageOrderPreparationTime = (int) (totalOrderPreparationTime / totalCustomersServed);
+        LocalTime firstArrival = customerServingData.get(0).getEvents().get("Arrival");
+        LocalTime lastLeave = customerServingData.get(customerServingData.size() - 1).getEvents().get("Leave");
+        long totalSimulationTime = Duration.between(firstArrival, lastLeave).toMinutes();
+
+        StringBuilder summary = new StringBuilder();
+        summary.append("\n[End of Simulation]\n")
+                .append("\nSummary:\n")
+                .append("- Total Customers Served: ").append(totalCustomersServed).append("\n")
+                .append("- Average Wait Time for Table: ").append(averageWaitTime).append(" Minutes\n")
+                .append("- Average Order Preparation Time: ").append(averageOrderPreparationTime).append(" Minutes\n")
+                .append("- Total Simulation Time: ").append(totalSimulationTime).append(" Minutes\n");
+
+        return summary.toString();
+    }
+
 
     //Helper methods --------------------------------------------------------------
     //Calculate the delay time for each customer

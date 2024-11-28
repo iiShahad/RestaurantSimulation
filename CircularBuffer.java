@@ -9,6 +9,7 @@ class CircularBuffer<T> {
     private final Object[] buffer;
     private final CustomSemaphore consumingSemaphore;
     private final CustomSemaphore producingSemaphore;
+    private volatile boolean endShift = false;
 
     public CircularBuffer(int maxSize) {
         this.maxSize = maxSize;
@@ -52,13 +53,12 @@ class CircularBuffer<T> {
             producingSemaphore.acquire();
             lock.lock();
             try {
+                if (endShift) {
+                    return;
+                }
                 buffer[head] = item;
                 head = (head + 1) % maxSize;
-                if (size == maxSize) {
-                    tail = (tail + 1) % maxSize;
-                } else {
-                    size++;
-                }
+                size++;
             } finally {
                 lock.unlock();
             }
@@ -106,12 +106,18 @@ class CircularBuffer<T> {
                 lock.unlock();
             }
             producingSemaphore.release();
-
         } catch (Exception e) {
             System.err.println("Exception in remove method: " + e.getMessage());
 
         }
         return item;
+    }
+
+    // Method to end the shift and release semaphores
+    public void endShift() {
+        endShift = true;
+        consumingSemaphore.release(); // Release semaphore to unblock waiting threads
+        producingSemaphore.release(); // Release semaphore to unblock waiting threads
     }
 
     //getters --------------------------------------------------------------------

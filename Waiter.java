@@ -1,12 +1,14 @@
-class Chef extends Thread {
+
+import java.util.Random;
+
+class Waiter extends Thread {
+
     //Constructor --------------------------------------------------------------------
     private final int id;
-    private final CircularBuffer<Order> orderBuffer;
     private final CircularBuffer<Order> readyOrders;
 
-    public Chef(int id, CircularBuffer<Order> orderBuffer, CircularBuffer<Order> readyOrders) {
+    public Waiter(int id, CircularBuffer<Order> readyOrders) {
         this.id = id;
-        this.orderBuffer = orderBuffer;
         this.readyOrders = readyOrders;
     }
 
@@ -36,33 +38,30 @@ class Chef extends Thread {
     - This notifies that the meal is ready for the customer.
 
     7. In the `finally` block, check if the `mutex` lock has been acquired and ensure it is released if necessary, avoiding a deadlock.
-    */
+     */
     @Override
     public void run() {
-        while (!endShift || !orderBuffer.isEmpty()) { //Continue until the end of the shift or all orders are processed
+        while (!endShift || !readyOrders.isEmpty()) { //Continue until the end of the shift or all orders are processed
             try {
-                mutex.acquire(); //Acquire the mutex lock
                 try {
+                    mutex.acquire(); //Acquire the mutex lock
                     //retrieve order from buffer
-                    Order orderMeal = (Order) orderBuffer.remove();
+                    Order orderMeal = (Order) readyOrders.remove();
                     if (orderMeal == null) {
                         mutex.release();
                         break;
                     }
 
-                    System.out.println("Chef " + id + " is preparing " + orderMeal.getMealName() + " for Customer " + orderMeal.getCustomerId());
-                    orderMeal.markOrderStart(this.id);
+                    System.out.println("Waiter " + id + " is serving " + orderMeal.getMealName() + " for Customer " + orderMeal.getCustomerId());
 
                     mutex.release(); //Release the mutex lock
 
-                    //simulate meal preparation time
-                    Thread.sleep((long)(1000 * orderMeal.getMealTime() * 60 * 0.1));
-                    System.out.println("Chef " + id + " has prepared " + orderMeal.getMealName() + " for Customer " + orderMeal.getCustomerId());
+                    //simulate meal serving time
+                    Thread.sleep((long) (1000 * generateRandomServingTime() * 60 * 0.1));
+                    System.out.println("Waiter " + id + " has served " + orderMeal.getMealName() + " for Customer " + orderMeal.getCustomerId());
 
                     //mark order as ready and notify customer
-                    orderMeal.markOrderReady();
-                    readyOrders.add(orderMeal);
-
+                    orderMeal.markOrderServed(this.id);
                 } finally {
                     //Ensure mutex is released in case of exception
                     if (mutex.getCurrentPermits() == 0) {
@@ -79,8 +78,17 @@ class Chef extends Thread {
     //endShift method --------------------------------------------------------------
     //This method is used to end the shift of the chef when all the customers have been served
     public void endShift() {
-        System.out.println("Chef " + id + " has ended the shift");
+        System.out.println("Waiter " + id + " has ended the shift");
         endShift = true;
-        orderBuffer.endShift();
+        readyOrders.endShift();
+    }
+
+    //This method is used to generate a random serving time time between 5 and 10 minutes
+    public int generateRandomServingTime() {
+        Random random = new Random();
+        int min = 5;
+        int max = 10;
+        int num = ((random.nextInt((max - min) + 1) + min));
+        return num;
     }
 }

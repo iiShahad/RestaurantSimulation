@@ -101,10 +101,15 @@ class Customer extends Thread implements Comparable<Customer> {
             int chefId = order.waitUntilOrderStart();
             timeline.put("ChefStart", getTimeDifference(operationStart)); //add the chef start time to the timeline
 
-            //customer receives order
+            //customer order ready
             order.waitUntilOrderReady(); //wait until the order is ready and get the chef id, the chef will notify the customer when the order is ready
-            System.out.println("Customer " + id + " receives the order from Chef " + chefId);
+            System.out.println("Customer " + id + " order has been prepared by chef " + chefId);
             timeline.put("ChefFinish", getTimeDifference(operationStart)); //add the chef finish time to the timeline
+
+            //customer receives the order
+            int waiterId = order.waitUntilOrderServed(); //wait until the order is served by the waiter
+            System.out.println("Customer " + id + " receives the order from the waiter " + waiterId);
+            timeline.put("Serve", getTimeDifference(operationStart)); //add the serve time to the timeline
 
             //customer starts eating
             System.out.println("Customer " + id + " starts eating.");
@@ -115,7 +120,7 @@ class Customer extends Thread implements Comparable<Customer> {
             this.serveTime = getTimeDifference(operationStart); //store the serve time to sort the customers by serving time in the queue and remove the customer from the tableQueue
 
             //remove the customer from the tableQueue
-            CustomerData customerData = new CustomerData(id, chefId, 1, timeline, order, tableIndex); //create a new CustomerData object to store the customer data
+            CustomerData customerData = new CustomerData(id, chefId, waiterId, timeline, order, tableIndex); //create a new CustomerData object to store the customer data
             customerServingData.put((this.id - 1), customerData); //add the customer data to the customerServingTimeline
             Customer removed = (Customer) tableQueue.remove(tableIndex - 1); //remove the customer from the tableQueue
             System.out.println("Customer " + removed.id + " has left the restaurant.");

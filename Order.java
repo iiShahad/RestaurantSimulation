@@ -10,6 +10,7 @@ class Order {
     private final int mealTime;
     private final int customerId;
     private int chefId;
+    private int waiterId;
 
     public Order(String mealName, int mealTime, int customerId) {
         this.mealName = mealName;
@@ -21,8 +22,10 @@ class Order {
     private final Lock lock = new ReentrantLock();
     private final Condition orderReadyCondition = lock.newCondition();
     private final Condition orderStartedCondition = lock.newCondition(); 
+    private final Condition orderServedCondition = lock.newCondition(); 
     private boolean orderReady = false;
     private boolean orderStart = false;
+    private boolean orderServed = false;
 
     //waitUntilOrderReady method ----------------------------------------------------
     /*
@@ -72,6 +75,20 @@ class Order {
         return chefId;
     }
 
+    public int waitUntilOrderServed() {
+        lock.lock();
+        try {
+            while (!orderServed) {
+                orderServedCondition.await(); //thread will keep waiting until order is ready
+            }
+        } catch (Exception e) {
+            System.err.println("Exception in waitUntilOrderServed: " + e.getMessage());
+        } finally {
+            lock.unlock();
+        }
+        return waiterId;
+    }
+
     //markOrderReady method ---------------------------------------------------------
     /*
     This method is used to mark an order as ready and notify the waiting customer that the order can now be served. It updates the order status and signals the waiting thread (the customer) that the order is ready.
@@ -109,6 +126,18 @@ class Order {
             orderStart = true;
             this.chefId = chefId;
             orderStartedCondition.signal();
+        } catch (Exception e) {
+            System.err.println("Exception in markOrderReady: " + e.getMessage());
+        } finally {
+            lock.unlock();
+        }
+    }
+    public void markOrderServed(int waiterId) {
+        lock.lock();
+        try {
+            orderServed = true;
+            this.waiterId = waiterId;
+            orderServedCondition.signal();
         } catch (Exception e) {
             System.err.println("Exception in markOrderReady: " + e.getMessage());
         } finally {
