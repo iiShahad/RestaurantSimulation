@@ -31,7 +31,6 @@ class Customer extends Thread implements Comparable<Customer> {
     @Override
     public void run() {
         try {
-            System.out.println("delay: " + delay);
             Thread.sleep((long)( (delay > 0) ? delay * 1000 * 60 * 0.1 : 1));
             System.out.println("Customer " + id + " has arrived.");
 
